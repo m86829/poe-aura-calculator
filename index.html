@@ -1888,6 +1888,24 @@
             saveState(); calculateAura(); /* */
         });
     </script>
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            // 🌟 這裡使用你真實建立的 Worker 網址
+            const workerUrl = "https://views.m86829.workers.dev";
+
+            fetch(workerUrl)
+                .then(response => response.json())
+                .then(data => {
+                    // 將取得的數字轉化成千分位格式（例如 1,234），並塞進網頁
+                    const formattedViews = Number(data.views).toLocaleString();
+                    document.getElementById("view-counter-text").innerText = `👁 Views: ${formattedViews}`;
+                })
+                .catch(err => {
+                    console.error("計數器呼交失敗:", err);
+                    document.getElementById("view-counter-text").innerText = `👁 Views: --`;
+                });
+        });
+    </script>
 </body>
 
 </html>
