@@ -745,10 +745,10 @@
                         <div
                             style="width: 65px; height: 65px; position: absolute; bottom: 0; overflow: hidden; border-radius: 50%;">
                             <div
-                                style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; background-image: url('/trees/life-full.png'); background-size: contain; background-position: center; background-repeat: no-repeat;">
+                                style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; background-image: url('./public/trees/life-full.png'); background-size: contain; background-position: center; background-repeat: no-repeat;">
                             </div>
                             <div id="ball-life-reserve"
-                                style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; background-image: url('/trees/globe-reserve.png'); background-size: contain; background-position: center; background-repeat: no-repeat; clip-path: inset(0% 0% 100% 0%); transition: clip-path 0.1s ease-out;">
+                                style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; background-image: url('./public/trees/globe-reserve.png'); background-size: contain; background-position: center; background-repeat: no-repeat; clip-path: inset(0% 0% 100% 0%); transition: clip-path 0.1s ease-out;">
                             </div>
                         </div>
                     </div>
@@ -765,10 +765,10 @@
                         <div
                             style="width: 65px; height: 65px; position: absolute; bottom: 0; overflow: hidden; border-radius: 50%;">
                             <div
-                                style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; background-image: url('/trees/mana-full.png'); background-size: contain; background-position: center; background-repeat: no-repeat;">
+                                style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; background-image: url('./public/trees/mana-full.png'); background-size: contain; background-position: center; background-repeat: no-repeat;">
                             </div>
                             <div id="ball-mana-reserve"
-                                style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; background-image: url('/trees/globe-reserve.png'); background-size: contain; background-position: center; background-repeat: no-repeat; clip-path: inset(0% 0% 100% 0%); transition: clip-path 0.1s ease-out;">
+                                style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; background-image: url('./public/trees/globe-reserve.png'); background-size: contain; background-position: center; background-repeat: no-repeat; clip-path: inset(0% 0% 100% 0%); transition: clip-path 0.1s ease-out;">
                             </div>
                         </div>
                     </div>
@@ -910,7 +910,7 @@
                             <td class="left-group-label" style="text-align: center; color: #475569; font-weight: bold;">
                                 固定值</td>
                             <td class="aura-title-flex" style="border-left: 1px solid #777777 !important;"><img
-                                    src="./auras/vitality.png" class="aura-icon-img">
+                                    src="./public/auras/vitality.png" class="aura-icon-img">
                                 活力等級: <input type="number" id="lv-vitality" value="20" min="1" max="35"
                                     class="input-yellow inline-lv"></td>
                             <td class="td-yellow" style="border-left: 1px solid #777777 !important;"><input
@@ -927,7 +927,7 @@
                             <td class="left-group-label" style="text-align: center; color: #475569; font-weight: bold;">
                                 固定值</td>
                             <td class="aura-title-flex" style="border-left: 1px solid #777777 !important;"><img
-                                    src="./auras/precision.png" class="aura-icon-img">
+                                    src="./public/auras/precision.png" class="aura-icon-img">
                                 精準等級: <input type="number" id="lv-precision" value="20" min="1" max="35"
                                     class="input-yellow inline-lv"></td>
                             <td class="td-yellow" style="border-left: 1px solid #777777 !important;"><input
@@ -944,7 +944,7 @@
                             <td class="left-group-label" style="text-align: center; color: #475569; font-weight: bold;">
                                 固定值</td>
                             <td class="aura-title-flex" style="border-left: 1px solid #777777 !important;"><img
-                                    src="./auras/clarity.png" class="aura-icon-img">
+                                    src="./public/auras/clarity.png" class="aura-icon-img">
                                 清晰等級: <input type="number" id="lv-clarity" value="20" min="1" max="35"
                                     class="input-yellow inline-lv"></td>
                             <td class="td-yellow" style="border-left: 1px solid #777777 !important;"><input
@@ -1020,48 +1020,48 @@
         };
 
         const AURA_CONFIG = [
-            { group: "50%", id: "determination", name: "堅定", base: 50, url: "./auras/determination.png" },
-            { group: "50%", id: "grace", name: "優雅", base: 50, url: "./auras/grace.png" },
-            { group: "50%", id: "hatred", name: "憎恨", base: 50, url: "./auras/hatred.png" },
-            { group: "50%", id: "wrath", name: "雷霆", base: 50, url: "./auras/wrath.png" },
-            { group: "50%", id: "anger", name: "憤怒", base: 50, url: "./auras/anger.png" },
-            { group: "50%", id: "zealotry", name: "狂熱", base: 50, url: "./auras/zealotry.png" },
-            { group: "50%", id: "purity-elements", name: "元素淨化", base: 50, url: "./auras/purity-elements.png" },
-            { group: "50%", id: "haste", name: "迅捷", base: 50, url: "./auras/haste.png" },
-            { group: "50%", id: "pride", name: "驕傲", base: 50, url: "./auras/pride.png" },
+            { group: "50%", id: "determination", name: "堅定", base: 50, url: "./public/auras/determination.png" },
+            { group: "50%", id: "grace", name: "優雅", base: 50, url: "./public/auras/grace.png" },
+            { group: "50%", id: "hatred", name: "憎恨", base: 50, url: "./public/auras/hatred.png" },
+            { group: "50%", id: "wrath", name: "雷霆", base: 50, url: "./public/auras/wrath.png" },
+            { group: "50%", id: "anger", name: "憤怒", base: 50, url: "./public/auras/anger.png" },
+            { group: "50%", id: "zealotry", name: "狂熱", base: 50, url: "./public/auras/zealotry.png" },
+            { group: "50%", id: "purity-elements", name: "元素淨化", base: 50, url: "./public/auras/purity-elements.png" },
+            { group: "50%", id: "haste", name: "迅捷", base: 50, url: "./public/auras/haste.png" },
+            { group: "50%", id: "pride", name: "驕傲", base: 50, url: "./public/auras/pride.png" },
 
-            { group: "35%", id: "purity-ice", name: "冰霜淨化", base: 35, url: "./auras/purity-ice.png" },
-            { group: "35%", id: "purity-fire", name: "火焰淨化", base: 35, url: "./auras/purity-fire.png" },
-            { group: "35%", id: "purity-lightning", name: "閃電淨化", base: 35, url: "./auras/purity-lightning.png" },
-            { group: "35%", id: "discipline", name: "紀律", base: 35, url: "./auras/discipline.png" },
-            { group: "35%", id: "blasphemy", name: "詛咒光環", base: 35, url: "./auras/blasphemy.png" },
-            { group: "35%", id: "petrified-blood", name: "石化之血", base: 35, url: "./auras/petrified-blood.png" },
-            { group: "35%", id: "skitterbots", name: "召喚探測機獸", base: 35, url: "./auras/skitterbots.png" },
+            { group: "35%", id: "purity-ice", name: "冰霜淨化", base: 35, url: "./public/auras/purity-ice.png" },
+            { group: "35%", id: "purity-fire", name: "火焰淨化", base: 35, url: "./public/auras/purity-fire.png" },
+            { group: "35%", id: "purity-lightning", name: "閃電淨化", base: 35, url: "./public/auras/purity-lightning.png" },
+            { group: "35%", id: "discipline", name: "紀律", base: 35, url: "./public/auras/discipline.png" },
+            { group: "35%", id: "blasphemy", name: "詛咒光環", base: 35, url: "./public/auras/blasphemy.png" },
+            { group: "35%", id: "petrified-blood", name: "石化之血", base: 35, url: "./public/auras/petrified-blood.png" },
+            { group: "35%", id: "skitterbots", name: "召喚探測機獸", base: 35, url: "./public/auras/skitterbots.png" },
 
-            { group: "34%", id: "c34-1", name: "異界詛咒光環 1", base: 34, url: "./auras/blasphemy.png" }, { group: "34%", id: "c34-2", name: "異界詛咒光環 2", base: 34, url: "./auras/blasphemy.png" }, { group: "34%", id: "c34-3", name: "異界詛咒光環 3", base: 34, url: "./auras/blasphemy.png" }, { group: "34%", id: "c34-4", name: "異界詛咒光環 4", base: 34, url: "./auras/blasphemy.png" }, { group: "34%", id: "c34-5", name: "異界詛咒光環 5", base: 34, url: "./auras/blasphemy.png" },
-            { group: "33%", id: "c33-1", name: "異界詛咒光環 1", base: 33, url: "./auras/blasphemy.png" }, { group: "33%", id: "c33-2", name: "異界詛咒光環 2", base: 33, url: "./auras/blasphemy.png" }, { group: "33%", id: "c33-3", name: "異界詛咒光環 3", base: 33, url: "./auras/blasphemy.png" }, { group: "33%", id: "c33-4", name: "異界詛咒光環 4", base: 33, url: "./auras/blasphemy.png" }, { group: "33%", id: "c33-5", name: "異界詛咒光環 5", base: 33, url: "./auras/blasphemy.png" },
-            { group: "32%", id: "c32-1", name: "異界詛咒光環 1", base: 32, url: "./auras/blasphemy.png" }, { group: "32%", id: "c32-2", name: "異界詛咒光環 2", base: 32, url: "./auras/blasphemy.png" }, { group: "32%", id: "c32-3", name: "異界詛咒光環 3", base: 32, url: "./auras/blasphemy.png" }, { group: "32%", id: "c32-4", name: "異界詛咒光環 4", base: 32, url: "./auras/blasphemy.png" }, { group: "32%", id: "c32-5", name: "異界詛咒光環 5", base: 32, url: "./auras/blasphemy.png" },
-            { group: "31%", id: "c31-1", name: "異界詛咒光環 1", base: 31, url: "./auras/blasphemy.png" }, { group: "31%", id: "c31-2", name: "異界詛咒光環 2", base: 31, url: "./auras/blasphemy.png" }, { group: "31%", id: "c31-3", name: "異界詛咒光環 3", base: 31, url: "./auras/blasphemy.png" }, { group: "31%", id: "c31-4", name: "異界詛咒光環 4", base: 31, url: "./auras/blasphemy.png" }, { group: "31%", id: "c31-5", name: "異界詛咒光環 5", base: 31, url: "./auras/blasphemy.png" },
-            { group: "30%", id: "c30-1", name: "異界詛咒光環 1", base: 30, url: "./auras/blasphemy.png" }, { group: "30%", id: "c30-2", name: "異界詛咒光環 2", base: 30, url: "./auras/blasphemy.png" }, { group: "30%", id: "c30-3", name: "異界詛咒光環 3", base: 30, url: "./auras/blasphemy.png" }, { group: "30%", id: "c30-4", name: "異界詛咒光環 4", base: 30, url: "./auras/blasphemy.png" }, { group: "30%", id: "c30-5", name: "異界詛咒光環 5", base: 30, url: "./auras/blasphemy.png" },
+            { group: "34%", id: "c34-1", name: "異界詛咒光環 1", base: 34, url: "./public/auras/blasphemy.png" }, { group: "34%", id: "c34-2", name: "異界詛咒光環 2", base: 34, url: "./public/auras/blasphemy.png" }, { group: "34%", id: "c34-3", name: "異界詛咒光環 3", base: 34, url: "./public/auras/blasphemy.png" }, { group: "34%", id: "c34-4", name: "異界詛咒光環 4", base: 34, url: "./public/auras/blasphemy.png" }, { group: "34%", id: "c34-5", name: "異界詛咒光環 5", base: 34, url: "./public/auras/blasphemy.png" },
+            { group: "33%", id: "c33-1", name: "異界詛咒光環 1", base: 33, url: "./public/auras/blasphemy.png" }, { group: "33%", id: "c33-2", name: "異界詛咒光環 2", base: 33, url: "./public/auras/blasphemy.png" }, { group: "33%", id: "c33-3", name: "異界詛咒光環 3", base: 33, url: "./public/auras/blasphemy.png" }, { group: "33%", id: "c33-4", name: "異界詛咒光環 4", base: 33, url: "./public/auras/blasphemy.png" }, { group: "33%", id: "c33-5", name: "異界詛咒光環 5", base: 33, url: "./public/auras/blasphemy.png" },
+            { group: "32%", id: "c32-1", name: "異界詛咒光環 1", base: 32, url: "./public/auras/blasphemy.png" }, { group: "32%", id: "c32-2", name: "異界詛咒光環 2", base: 32, url: "./public/auras/blasphemy.png" }, { group: "32%", id: "c32-3", name: "異界詛咒光環 3", base: 32, url: "./public/auras/blasphemy.png" }, { group: "32%", id: "c32-4", name: "異界詛咒光環 4", base: 32, url: "./public/auras/blasphemy.png" }, { group: "32%", id: "c32-5", name: "異界詛咒光環 5", base: 32, url: "./public/auras/blasphemy.png" },
+            { group: "31%", id: "c31-1", name: "異界詛咒光環 1", base: 31, url: "./public/auras/blasphemy.png" }, { group: "31%", id: "c31-2", name: "異界詛咒光環 2", base: 31, url: "./public/auras/blasphemy.png" }, { group: "31%", id: "c31-3", name: "異界詛咒光環 3", base: 31, url: "./public/auras/blasphemy.png" }, { group: "31%", id: "c31-4", name: "異界詛咒光環 4", base: 31, url: "./public/auras/blasphemy.png" }, { group: "31%", id: "c31-5", name: "異界詛咒光環 5", base: 31, url: "./public/auras/blasphemy.png" },
+            { group: "30%", id: "c30-1", name: "異界詛咒光環 1", base: 30, url: "./public/auras/blasphemy.png" }, { group: "30%", id: "c30-2", name: "異界詛咒光環 2", base: 30, url: "./public/auras/blasphemy.png" }, { group: "30%", id: "c30-3", name: "異界詛咒光環 3", base: 30, url: "./public/auras/blasphemy.png" }, { group: "30%", id: "c30-4", name: "異界詛咒光環 4", base: 30, url: "./public/auras/blasphemy.png" }, { group: "30%", id: "c30-5", name: "異界詛咒光環 5", base: 30, url: "./public/auras/blasphemy.png" },
 
-            { group: "25%", id: "herald-ash", name: "灰燼之捷", base: 25, url: "./auras/herald-ash.png" },
-            { group: "25%", id: "herald-ice", name: "冰霜之捷", base: 25, url: "./auras/herald-ice.png" },
-            { group: "25%", id: "herald-thunder", name: "閃電之捷", base: 25, url: "./auras/herald-thunder.png" },
-            { group: "25%", id: "herald-agony", name: "苦痛之捷", base: 25, url: "./auras/herald-agony.png" },
-            { group: "25%", id: "herald-purity", name: "純淨之捷", base: 25, url: "./auras/herald-purity.png" },
-            { group: "25%", id: "spider-blessing", name: "毒蛛祝福", base: 25, url: "./auras/spider-blessing.png" },
-            { group: "25%", id: "avian-blessing", name: "飛羽祝福", base: 25, url: "./auras/avian-blessing.png" },
-            { group: "25%", id: "cat-blessing", name: "傲貓祝福", base: 25, url: "./auras/cat-blessing.png" },
-            { group: "25%", id: "crab-blessing", name: "蟹將祝福", base: 25, url: "./auras/crab-blessing.png" },
-            { group: "25%", id: "arctic-armour", name: "極地裝甲", base: 25, url: "./auras/arctic-armour.png" },
-            { group: "25%", id: "tempest-shield", name: "暴風之盾", base: 25, url: "./auras/tempest-shield.png" },
-            { group: "25%", id: "flesh-bone", name: "血肉骸骨", base: 25, url: "./auras/flesh-bone.png" },
+            { group: "25%", id: "herald-ash", name: "灰燼之捷", base: 25, url: "./public/auras/herald-ash.png" },
+            { group: "25%", id: "herald-ice", name: "冰霜之捷", base: 25, url: "./public/auras/herald-ice.png" },
+            { group: "25%", id: "herald-thunder", name: "閃電之捷", base: 25, url: "./public/auras/herald-thunder.png" },
+            { group: "25%", id: "herald-agony", name: "苦痛之捷", base: 25, url: "./public/auras/herald-agony.png" },
+            { group: "25%", id: "herald-purity", name: "純淨之捷", base: 25, url: "./public/auras/herald-purity.png" },
+            { group: "25%", id: "spider-blessing", name: "毒蛛祝福", base: 25, url: "./public/auras/spider-blessing.png" },
+            { group: "25%", id: "avian-blessing", name: "飛羽祝福", base: 25, url: "./public/auras/avian-blessing.png" },
+            { group: "25%", id: "cat-blessing", name: "傲貓祝福", base: 25, url: "./public/auras/cat-blessing.png" },
+            { group: "25%", id: "crab-blessing", name: "蟹將祝福", base: 25, url: "./public/auras/crab-blessing.png" },
+            { group: "25%", id: "arctic-armour", name: "極地裝甲", base: 25, url: "./public/auras/arctic-armour.png" },
+            { group: "25%", id: "tempest-shield", name: "暴風之盾", base: 25, url: "./public/auras/tempest-shield.png" },
+            { group: "25%", id: "flesh-bone", name: "血肉骸骨", base: 25, url: "./public/auras/flesh-bone.png" },
 
-            { group: "10%", id: "blood-sand", name: "血腥沙戮", base: 10, url: "./auras/blood-sand.png" },
-            { group: "10%", id: "temporal-rift", name: "時空裂隙", base: 10, url: "./auras/temporal-rift.png" },
-            { group: "10%", id: "war-banner", name: "戰爭之旗", base: 10, url: "./auras/war-banner.png" },
-            { group: "10%", id: "defiance-banner", name: "反抗之旗", base: 10, url: "./auras/defiance-banner.png" },
-            { group: "10%", id: "dread-banner", name: "恐懼之旗", base: 10, url: "./auras/dread-banner.png" }
+            { group: "10%", id: "blood-sand", name: "血腥沙戮", base: 10, url: "./public/auras/blood-sand.png" },
+            { group: "10%", id: "temporal-rift", name: "時空裂隙", base: 10, url: "./public/auras/temporal-rift.png" },
+            { group: "10%", id: "war-banner", name: "戰爭之旗", base: 10, url: "./public/auras/war-banner.png" },
+            { group: "10%", id: "defiance-banner", name: "反抗之旗", base: 10, url: "./public/auras/defiance-banner.png" },
+            { group: "10%", id: "dread-banner", name: "恐懼之旗", base: 10, url: "./public/auras/dread-banner.png" }
         ];
 
         // 🌟 3.26v5 完整裝備選單名冊 (文字全置中、數值全面精確對齊 CSV 最大值)
@@ -1435,7 +1435,7 @@
                     <td style="padding: 6px; text-align: center;">
                         <div style="display: flex; align-items: center; justify-content: center; gap: 20px;">
                             <div style="width: 240px; height: 110px; display: flex; align-items: center; justify-content: center; background-color: transparent;">
-                                <img src="/trees/${t.id}.png" style="max-width: 100%; max-height: 100%; object-fit: contain; display: block;" onerror="this.style.display='none'; console.error('找不到天賦圖片: ' + this.src);">
+                                <img src="./public/trees/${t.id}.png" style="max-width: 100%; max-height: 100%; object-fit: contain; display: block;" onerror="this.style.display='none'; console.error('找不到天賦圖片: ' + this.src);">
                             </div>
                             <div style="display: flex; align-items: center; justify-content: center; gap: 8px; font-weight: bold; font-size: 0.9rem; width: 45px;">
                                 <span style="display: inline-block; width: 14px; text-align: center;">A</span>
@@ -1461,7 +1461,7 @@
                     <td style="padding: 6px 15px;">
                         <div style="display: flex; align-items: center; justify-content: center; gap: 40px;">
                             <div style="width: 150px; height: 150px; border: 1px solid #444444; display: flex; align-items: center; justify-content: center; background-color: transparent;">
-                                <img src="/trees/${t.id}.png" style="width: 100%; height: 100%; object-fit: cover; display: block;" onerror="this.style.display='none'; console.error('找不到天賦圖片: ' + this.src);">
+                                <img src="./public/trees/${t.id}.png" style="width: 100%; height: 100%; object-fit: cover; display: block;" onerror="this.style.display='none'; console.error('找不到天賦圖片: ' + this.src);">
                             </div>
                             <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px;">
                                 ${nodesHtml}
