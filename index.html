@@ -1697,13 +1697,13 @@
                         let finalPct = (basePct * arrMultiplier * enlMultiplier * (gemMult / 100) * extraSupportMult * 100) / (100 + finalLifeEff + slotEff);
                         finalPct = Math.floor(finalPct * 10000) / 10000;
                         sumPctLife += finalPct;
-                        if (dispLife) dispLife.innerText = `${finalPct.toFixed(1)}%`;
+                        if (dispLife) dispLife.innerText = `${finalPct.toFixed(2)}%`;
                         if (dispMana) dispMana.innerText = "-";
                     } else {
                         let finalPct = (basePct * enlMultiplier * (gemMult / 100) * extraSupportMult * 100) / (100 + finalManaEff + slotEff);
                         finalPct = Math.floor(finalPct * 10000) / 10000;
                         sumPctMana += finalPct;
-                        if (dispMana) dispMana.innerText = `${finalPct.toFixed(1)}%`;
+                        if (dispMana) dispMana.innerText = `${finalPct.toFixed(2)}%`;
                         if (dispLife) dispLife.innerText = "-";
                     }
                 } else {
@@ -1814,7 +1814,7 @@
             const txtManaPts = document.getElementById('ball-mana-text-pts');
 
             if (panelLifeText && txtLifeRes && txtLifePts) {
-                txtLifeRes.innerText = "Reserved: " + Math.round(reserveLifePct) + "%";
+                txtLifeRes.innerText = "Reserved: " + reserveLifePct.toFixed(2) + "%";
                 txtLifePts.innerText = "Life: " + finalLife.toLocaleString() + " / " + baseLife;
                 if (finalLife < 0) {
                     panelLifeText.style.color = "#ff0000";
@@ -1824,7 +1824,7 @@
             }
 
             if (panelManaText && txtManaRes && txtManaPts) {
-                txtManaRes.innerText = "Reserved: " + Math.round(reserveManaPct) + "%";
+                txtManaRes.innerText = "Reserved: " + reserveManaPct.toFixed(2) + "%";
                 txtManaPts.innerText = "Mana: " + finalMana.toLocaleString() + " / " + baseMana;
                 if (finalMana < 0) {
                     panelManaText.style.color = "#ff0000";
