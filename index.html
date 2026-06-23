@@ -47,7 +47,7 @@
             padding: 0 10px;
         }
 
-        /* 超級置頂控制列：標題放大、區塊窄化置中、全域文字縮小 */
+        /* CSS 新片段 (請將 gap 改為 25px，並加上 min-width 防止過度擠壓) */
         .mega-sticky-header {
             position: sticky;
             top: 0;
@@ -58,7 +58,10 @@
             display: flex;
             align-items: center;
             justify-content: space-between;
-            gap: 5px;
+            gap: 40px;
+            /* 新的防撞間距 */
+            min-width: 1250px;
+            /* 確保網頁縮小時，整條置頂列不會崩潰貼死 */
         }
 
         .header-left-zone {
@@ -489,8 +492,8 @@
             display: block;
             margin: 0 auto;
             cursor: pointer;
-            width: 14px;
-            height: 14px;
+            width: 20px;
+            height: 20px;
         }
 
         /* 最終保留結果欄位：只呈現百分比 */
@@ -801,10 +804,12 @@
 
             <div class="header-right-zone">
                 <nav class="nav-links">
+                    <button class="nav-btn" id="btn-tab-user-guide" onclick="switchTab('tab-user-guide')"
+                        style="color: #334155; font-weight: bold;">使用指南</button>
+                    <button class="nav-btn" id="btn-tab-tree" onclick="switchTab('tab-tree')">天賦來源</button>
+                    <button class="nav-btn" id="btn-tab-gear" onclick="switchTab('tab-gear')">裝備來源</button>
                     <button class="nav-btn active" id="btn-tab-calculator"
                         onclick="switchTab('tab-calculator')">光環計算機</button>
-                    <button class="nav-btn" id="btn-tab-gear" onclick="switchTab('tab-gear')">裝備來源</button>
-                    <button class="nav-btn" id="btn-tab-tree" onclick="switchTab('tab-tree')">天賦來源</button>
                 </nav>
             </div>
         </header>
@@ -998,15 +1003,50 @@
                     <tbody id="tree-grid-body"></tbody>
                 </table>
             </div>
-            <footer class="excel-footer">
-                <div style="margin-bottom: 8px;">
-                    <span id="view-counter-text">👁 Views: Loading...</span>
+
+            <div id="tab-user-guide" class="tab-content"
+                style="padding: 20px; background-color: #ffffff; border: 1px solid #777777; margin-top: 10px; text-align: center;">
+
+                <div class="guide-control-bar"
+                    style="background-color: #f1f5f9; border: 1px solid #cbd5e1; padding: 8px 16px; margin-bottom: 20px; display: flex; align-items: center; justify-content: center; gap: 12px; border-radius: 2px;">
+                    <span style="font-size: 0.85rem; font-weight: bold; color: #334155;">🔍 圖片顯示大小：</span>
+                    <input type="range" id="guide-zoom-slider" min="50" max="100" value="100"
+                        style="cursor: pointer; width: 200px;">
+                    <span id="guide-zoom-val"
+                        style="font-size: 0.85rem; font-weight: bold; color: #1e3a8a; font-family: monospace; width: 45px; text-align: left;">100%</span>
+                </div>
+
+                <div style="margin-bottom: 20px;">
+                    <img src="guide1.png" alt="使用指南 1" class="guide-img"
+                        style="width: 100%; max-width: 100%; height: auto; border: 1px solid #cbd5e1; box-shadow: 0 2px 4px rgba(0,0,0,0.05); transition: width 0.1s ease;">
+                </div>
+                <div style="margin-bottom: 20px;">
+                    <img src="guide2.png" alt="使用指南 2" class="guide-img"
+                        style="width: 100%; max-width: 100%; height: auto; border: 1px solid #cbd5e1; box-shadow: 0 2px 4px rgba(0,0,0,0.05); transition: width 0.1s ease;">
                 </div>
                 <div>
-                    © 2026 Milton-Hsu. All Rights Reserved. Designed for PoE Aura Calculation.
+                    <img src="guide3.png" alt="使用指南 3" class="guide-img"
+                        style="width: 100%; max-width: 100%; height: auto; border: 1px solid #cbd5e1; box-shadow: 0 2px 4px rgba(0,0,0,0.05); transition: width 0.1s ease;">
                 </div>
-            </footer>
-        </main>
+            </div>
+
+    </div>
+
+
+    <footer class="excel-footer">
+        <div style="margin-bottom: 8px;">
+            <span id="view-counter-text">👁 Views: Loading...</span>
+        </div>
+        <div style="margin-bottom: 4px;">
+            © 2026 Milton-Hsu. All Rights Reserved. Designed for PoE Aura Calculation.
+        </div>
+        <div
+            style="font-size: 0.55rem; color: #999999; text-align: center; max-width: 800px; font-weight: normal; line-height: 1.4; margin-top: 4px;">
+            This tool is an unofficial fan-made project. All game images, icons, and data related to Path of
+            Exile are copyrights and trademarks of Grinding Gear Games. No copyright infringement intended.
+        </div>
+    </footer>
+    </main>
     </div>
 
     <script>
@@ -1191,10 +1231,11 @@
                     { node: "B", label: "群體領袖", eff: 0, mres: 12, lres: 12 }
                 ]
             },
-            { id: "mastery-mana", name: "【魔力專精】12%魔力保留", isSpecial: true, img: "mastery-mana.png", label: "魔力專精", eff: 0, mres: 12, lres: 0 },
-            { id: "mastery-reserve", name: "【保留專精】20%生命保留", isSpecial: true, img: "mastery-reserve.png", label: "保留專精", eff: 0, mres: 0, lres: 20 },
-            { id: "asc-scion", name: "【貴族昇華】15%光環效果", isSpecial: true, img: "asc-scion.png", label: "貴族昇華", eff: 15, mres: 0, lres: 0 },
-            { id: "asc-champ", name: "【冠軍昇華】30%光環效果", isSpecial: true, img: "asc-champ.png", label: "冠軍昇華", eff: 30, mres: 0, lres: 0 }
+            { id: "mastery-mana", name: "【魔力專精】<br>12%魔力保留", isSpecial: true, img: "mastery-mana.png", label: "魔力專精", eff: 0, mres: 12, lres: 0 },
+            { id: "mastery-reserve", name: "【保留專精】<br>20%生命保留", isSpecial: true, img: "mastery-reserve.png", label: "保留專精", eff: 0, mres: 0, lres: 20 },
+            { id: "asc-scion", name: "【貴族昇華】<br>15%光環效果", isSpecial: true, img: "asc-scion.png", label: "貴族昇華", eff: 15, mres: 0, lres: 0 },
+            { id: "asc-champ", name: "【冠軍昇華】<br>30%光環效果", isSpecial: true, img: "asc-champ.png", label: "冠軍昇華", eff: 30, mres: 0, lres: 0 },
+            { id: "asc-guardian", name: "【守護者昇華】<br>50%技能保留", isSpecial: true, img: "asc-guardian.png", label: "守護者昇華", eff: 0, mres: 50, lres: 50 }
         ];
 
         let historyStack = [];
@@ -1342,8 +1383,17 @@
                 const rowsInGroup = AURA_CONFIG.filter(a => a.group === gName);
                 rowsInGroup.forEach((aura, idx) => {
                     let tr = document.createElement("tr");
-                    tr.className = "pct-row"; tr.id = `row-${aura.id}`; tr.setAttribute("data-base", aura.base);
-                    let groupTd = idx === 0 ? `<td class="left-group-label" rowspan="${rowsInGroup.length}">${gName}</td>` : "";
+                    // 🌟 核心：給 tr 加上群組識別 class (例如 group-50) 方便後續控制
+                    const safeGroupName = gName.replace('%', '');
+                    tr.className = `pct-row group-${safeGroupName}`;
+                    tr.id = `row-${aura.id}`;
+                    tr.setAttribute("data-base", aura.base);
+
+                    let groupTd = "";
+                    if (idx === 0) {
+                        groupTd = `<td class="left-group-label" id="toggle-btn-${safeGroupName}" rowspan="${rowsInGroup.length}" style="cursor: pointer; background-color: #FFFBF0; user-select: none; text-align: center; vertical-align: middle;" onclick="toggleAuraGroup('${safeGroupName}', this)">▼ ${gName}</td>`;
+                    }
+
                     tr.innerHTML = `
                         ${groupTd}
                         <td class="aura-title-flex" style="border-left: 1px solid #777777 !important;"><img src="${aura.url}" class="aura-icon-img">${aura.name}</td>
@@ -1375,6 +1425,45 @@
                 bindMiltonPowerControls(i, i.id.includes("mult") ? 100 : (i.id.includes("sup") ? 1 : 0));
             });
         }
+
+        // 🌟 終極字體校正版：確保展開時絕對是大字，摺疊時絕對是小字
+        window.toggleAuraGroup = function (groupName, element) {
+            const rows = document.querySelectorAll(`.group-${groupName}`);
+            const totalRows = rows.length;
+            let isCollapsing = element.innerText.includes('▼'); // 判斷當前是要折疊還是展開
+
+            rows.forEach((row, idx) => {
+                if (idx === 0) {
+                    const siblings = row.querySelectorAll('td:not(.left-group-label)');
+                    siblings.forEach(td => {
+                        td.style.display = isCollapsing ? 'none' : '';
+                    });
+                    row.style.backgroundColor = isCollapsing ? '#EDEDED' : ''; // 摺疊時整列變灰
+                } else {
+                    row.style.display = isCollapsing ? 'none' : '';
+                }
+            });
+
+            if (isCollapsing) {
+                element.rowSpan = 1;
+                element.colSpan = 10;
+                element.innerText = `▶ ${groupName}%`;
+                element.style.textAlign = 'left';
+                element.style.paddingLeft = '12px';
+                element.style.backgroundColor = '#EDEDED';
+                element.style.fontSize = '0.85rem';       // 🌟 摺疊時剛性變回小字
+                element.style.fontWeight = 'bold';
+            } else {
+                element.rowSpan = totalRows;
+                element.colSpan = 1;
+                element.innerText = `▼ ${groupName}%`;
+                element.style.textAlign = 'center';
+                element.style.paddingLeft = '';
+                element.style.backgroundColor = '#FFFBF0'; // 展開時回到米黃色
+                element.style.fontSize = '1.1rem';         // 🌟 展開時剛性維持大字
+                element.style.fontWeight = 'bold';
+            }
+        };
 
         function initSubPages() {
             // 裝備選單渲染 (強制全表數值置中，開啟防跑版折行)
@@ -1431,15 +1520,15 @@
                     if (t.isSpecial) {
                         // 🌟 4個單一特殊節點：調整欄位順序 (魔力 -> 生命 -> 光環)
                         tr.innerHTML = `
-                    <td><b>${t.name}</b></td>
-                    <td style="padding: 6px; text-align: center;">
+                            <td class="tree-hover-zone" data-id="${t.id}" data-is-special="true" style="cursor: help;"><b>${t.name}</b></td>
+                            <td style="padding: 6px; text-align: center;">
                         <div style="display: flex; align-items: center; justify-content: center; gap: 20px;">
                             <div style="width: 240px; height: 110px; display: flex; align-items: center; justify-content: center; background-color: transparent;">
                                 <img src="./public/trees/${t.id}.png" style="max-width: 100%; max-height: 100%; object-fit: contain; display: block;" onerror="this.style.display='none'; console.error('找不到天賦圖片: ' + this.src);">
                             </div>
-                            <div style="display: flex; align-items: center; justify-content: center; gap: 8px; font-weight: bold; font-size: 0.9rem; width: 45px;">
-                                <span style="display: inline-block; width: 14px; text-align: center;">A</span>
-                                <input type="checkbox" id="tree-special-chk-${t.id}" style="width: 15px; height: 15px; cursor: pointer; margin: 0;">
+                            <div style="display: flex; align-items: center; justify-content: center; gap: 8px; font-weight: bold; font-size: 1.2rem; width: 65px;">
+                                <span style="display: inline-block; width: 20px; text-align: center;">A</span>
+                                <input type="checkbox" id="tree-special-chk-${t.id}" style="width: 22px; height: 22px; cursor: pointer; margin: 0;">
                             </div>
                         </div>
                     </td>
@@ -1450,15 +1539,15 @@
                     } else {
                         // 🌟 前六個星盤：調整欄位順序 (魔力 -> 生命 -> 光環)
                         let nodesHtml = t.items.map(item => `
-                    <div style="display: flex; align-items: center; justify-content: center; gap: 8px; font-weight: bold; font-size: 0.9rem; height: 26px; width: 45px;">
-                        <span style="display: inline-block; width: 14px; text-align: center;">${item.node}</span>
-                        <input type="checkbox" id="node-chk-${t.id}-${item.node}" style="width: 15px; height: 15px; cursor: pointer; margin: 0;">
+                    <div style="display: flex; align-items: center; justify-content: center; gap: 8px; font-weight: bold; font-size: 1.2rem; height: 32px; width: 65px;">
+                        <span style="display: inline-block; width: 20px; text-align: center;">${item.node}</span>
+                        <input type="checkbox" id="node-chk-${t.id}-${item.node}" style="width: 22px; height: 22px; cursor: pointer; margin: 0;">
                     </div>
                 `).join("");
 
                         tr.innerHTML = `
-                    <td><b>${t.name}</b></td>
-                    <td style="padding: 6px 15px;">
+                            <td class="tree-hover-zone" data-id="${t.id}" data-is-special="false" style="cursor: help;"><b>${t.name}</b></td>
+                            <td style="padding: 6px 15px;">
                         <div style="display: flex; align-items: center; justify-content: center; gap: 40px;">
                             <div style="width: 150px; height: 150px; border: 1px solid #444444; display: flex; align-items: center; justify-content: center; background-color: transparent;">
                                 <img src="./public/trees/${t.id}.png" style="width: 100%; height: 100%; object-fit: cover; display: block;" onerror="this.style.display='none'; console.error('找不到天賦圖片: ' + this.src);">
@@ -1534,21 +1623,35 @@
             manaIn.disabled = !isEnabled;
 
             if (isEnabled) {
-                // 啟用手動輸入：切換為數字型態，清除 "-"，亮起提示字眼
+                // 🚀 啟用手動輸入：轉回數字型態
                 lifeIn.type = "number";
                 manaIn.type = "number";
-                lifeIn.value = "";
-                manaIn.value = "";
+
+                // 如果原本是 "-"（代表剛開網頁或被重置過），才清空讓使用者輸入
+                if (lifeIn.value === "-") lifeIn.value = "";
+                if (manaIn.value === "-") manaIn.value = "";
+
                 lifeIn.placeholder = "請輸入數值";
                 manaIn.placeholder = "請輸入數值";
+
+                // 恢復正常輸入框顏色
+                lifeIn.style.color = "#000000";
+                manaIn.style.color = "#000000";
             } else {
-                // 關閉手動輸入：切換為文字型態，退回乾淨米黃色並塞入 "-" 符號
+                // 🚀 取消打勾：轉成文字型態以相容未填寫時的狀態
                 lifeIn.type = "text";
                 manaIn.type = "text";
+
+                // 💡 核心記憶點：如果欄位是空的（沒填），才顯示 "-"
+                if (lifeIn.value.trim() === "") lifeIn.value = "-";
+                if (manaIn.value.trim() === "") manaIn.value = "-";
+
                 lifeIn.placeholder = "";
                 manaIn.placeholder = "";
-                lifeIn.value = "-";
-                manaIn.value = "-";
+
+                // 將字體變灰，視覺上提示目前處於「未啟用但保留歷史數值」的狀態
+                lifeIn.style.color = "#a1a1a1";
+                manaIn.style.color = "#a1a1a1";
             }
 
             calculateAura();
@@ -1842,7 +1945,13 @@
         function saveState() {
             const state = {};
             document.querySelectorAll('input, select').forEach(i => { if (i.id) state[i.id] = i.type === 'checkbox' ? i.checked : i.value; });
-            historyStack.push(JSON.stringify(state)); redoStack = [];
+
+            const stateString = JSON.stringify(state);
+            historyStack.push(stateString);
+            redoStack = [];
+
+            // 🚀 【方案 A 核心鎖】同步將最新配裝狀態剛性寫入瀏覽器永久快取
+            localStorage.setItem("poe_aura_calculator_build", stateString);
         }
 
         function restoreSnapshot(snap) {
@@ -1853,8 +1962,27 @@
             calculateAura();
         }
 
-        window.undo = function () { if (historyStack.length > 1) { redoStack.push(historyStack.pop()); restoreSnapshot(JSON.parse(historyStack[historyStack.length - 1])); } };
-        window.redo = function () { if (redoStack.length > 0) { const next = redoStack.pop(); historyStack.push(next); restoreSnapshot(JSON.parse(next)); } };
+        window.undo = function () {
+            if (historyStack.length > 1) {
+                redoStack.push(historyStack.pop());
+                const prevStateString = historyStack[historyStack.length - 1];
+                restoreSnapshot(JSON.parse(prevStateString));
+
+                // 🚀 【歷史記憶鎖】復原畫面後，剛性同步覆蓋 LocalStorage 檔案
+                localStorage.setItem("poe_aura_calculator_build", prevStateString);
+            }
+        };
+
+        window.redo = function () {
+            if (redoStack.length > 0) {
+                const nextStateString = redoStack.pop();
+                historyStack.push(nextStateString);
+                restoreSnapshot(JSON.parse(nextStateString));
+
+                // 🚀 【歷史記憶鎖】重做畫面後，剛性同步覆蓋 LocalStorage 檔案
+                localStorage.setItem("poe_aura_calculator_build", nextStateString);
+            }
+        };
 
         window.switchTab = function (tabId) {
             document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
@@ -1864,10 +1992,28 @@
         };
 
         document.addEventListener('DOMContentLoaded', () => {
-            renderCalculatorTable(); /* */
-            initSubPages(); /* */
-            bindMiltonPowerControls(document.getElementById("base-life"), 4000); /* */
-            bindMiltonPowerControls(document.getElementById("base-mana"), 1000); /* */
+            // 新程式碼片段
+            renderCalculatorTable();
+            initSubPages();
+
+            // 💡 新增：使用指南圖片縮放控制邏輯
+            const zoomSlider = document.getElementById("guide-zoom-slider");
+            const zoomValText = document.getElementById("guide-zoom-val");
+            const guideImages = document.querySelectorAll(".guide-img");
+
+            if (zoomSlider && zoomValText) {
+                zoomSlider.addEventListener("input", function () {
+                    const currentVal = this.value + "%";
+                    // 1. 即時更新 Bar 上的百分比文字
+                    zoomValText.innerText = currentVal;
+                    // 2. 全面剛性變更所有指南圖片的寬度
+                    guideImages.forEach(img => {
+                        img.style.width = currentVal;
+                    });
+                });
+            }
+
+            bindMiltonPowerControls(document.getElementById("base-life"), 4000);
 
             // 🌟 核心追加：手動輸入自填框的「中鍵 / Delete / 滾輪」Milton 快捷控制鎖
             const ovLife = document.getElementById("override-life-input");
@@ -1875,17 +2021,119 @@
             if (ovLife) bindMiltonPowerControls(ovLife, "-");
             if (ovMana) bindMiltonPowerControls(ovMana, "-");
 
+            // 🚀 【剛性修復】針對寫死在 HTML 的固定值光環（活力、精準、清晰）全面進行事件綁定
+            const flatAuras = ["vitality", "precision", "clarity"];
+            flatAuras.forEach(aura => {
+                // 1. 等級欄位 (預設等級 20)
+                const lvEl = document.getElementById(`lv-${aura}`);
+                if (lvEl) bindMiltonPowerControls(lvEl, 20);
+
+                // 2. 物品插槽保留效用 (預設 0)
+                const effEl = document.getElementById(`eff-${aura}`);
+                if (effEl) bindMiltonPowerControls(effEl, 0);
+
+                // 3. 80-100% 消耗保留加成 (預設 100)
+                const multEl = document.getElementById(`mult-${aura}`);
+                if (multEl) bindMiltonPowerControls(multEl, 100);
+
+                // 4. 其他輔助技能倍率 (預設 1)
+                const supEl = document.getElementById(`sup-${aura}`);
+                if (supEl) bindMiltonPowerControls(supEl, 1);
+
+                // 5. 啟蒙與傲慢下拉選單 (選單預設值綁定)
+                const enlEl = document.getElementById(`enl-${aura}`);
+                const arrEl = document.getElementById(`arr-${aura}`);
+                if (enlEl) bindMiltonPowerControls(enlEl, 0);
+                if (arrEl) bindMiltonPowerControls(arrEl, -1);
+            });
+
             // 🌟 核心修正：讓最大生命與最大魔力輸入框在數值變更(input)時，立刻剛性觸發即時重新計算
-            document.getElementById("base-life").addEventListener("input", () => { saveState(); calculateAura(); }); /* */
-            document.getElementById("base-mana").addEventListener("input", () => { saveState(); calculateAura(); }); /* */
+            document.getElementById("base-life").addEventListener("input", () => { saveState(); calculateAura(); }); /* [cite: 491] */
+            document.getElementById("base-mana").addEventListener("input", () => { saveState(); calculateAura(); }); /* [cite: 491] */
 
-            document.querySelectorAll('input, select').forEach(i => { /* */
-                if (i.id && !i.id.includes("base")) { /* */
-                    i.addEventListener(i.type === 'checkbox' ? 'change' : 'input', () => { saveState(); calculateAura(); }); /* */
+            document.querySelectorAll('input, select').forEach(i => {
+                if (i.id && !i.id.includes("base")) {
+                    i.addEventListener(i.type === 'checkbox' ? 'change' : 'input', () => { saveState(); calculateAura(); });
                 }
-            }); /* */
+            });
 
-            saveState(); calculateAura(); /* */
+            // 🚀 【方案 A 核心鎖】自動檢查瀏覽器是否有歷史配裝紀錄
+            const savedBuild = localStorage.getItem("poe_aura_calculator_build");
+            if (savedBuild) {
+                try {
+                    const state = JSON.parse(savedBuild);
+                    // 剛性將所有歷史數據塞回對應的 input 與 select 欄位中
+                    Object.keys(state).forEach(id => {
+                        const element = document.getElementById(id);
+                        if (element) {
+                            if (element.type === 'checkbox') {
+                                element.checked = state[id];
+                            } else {
+                                element.value = state[id];
+                            }
+                        }
+                    });
+
+                    // 🌟 核心記憶同步：因為手動輸入欄位有特定的文字/數字型態切換邏輯，讀檔時必須補觸發一次切換
+                    if (typeof toggleGlobalOverride === "function") {
+                        toggleGlobalOverride();
+                    }
+                } catch (e) {
+                    console.error("讀取歷史配裝失敗:", e);
+                }
+            } else {
+                // 如果是全新開網頁沒有任何紀錄，才執行初始存檔
+                saveState();
+            }
+
+            // 執行全網頁首次光環剛性計算
+            calculateAura();
+
+            // 🌟 新增：天賦位置滑鼠懸停（Hover）自動顯示螢幕一半大圖功能
+            const previewBox = document.getElementById("tree-big-preview");
+            const previewImg = document.getElementById("tree-big-img");
+
+            if (previewBox && previewImg) {
+                document.querySelectorAll(".tree-hover-zone").forEach(zone => {
+                    // 滑鼠移入：顯示大圖
+                    zone.addEventListener("mouseenter", function () {
+                        const id = this.getAttribute("data-id");
+                        const isSpecial = this.getAttribute("data-is-special") === "true";
+
+                        // 剛性判定：如果是前 6 主要星盤加上 "-big"，後 4 特殊節點用原本檔名
+                        let imgName = isSpecial ? `${id}.png` : `${id}-big.png`;
+
+                        previewImg.src = `./public/trees/${imgName}`;
+                        previewBox.style.display = "flex";
+                    });
+
+                    // 滑鼠移出：隱藏並清空路徑
+                    zone.addEventListener("mouseleave", function () {
+                        previewBox.style.display = "none";
+                        previewImg.src = "";
+                    });
+                });
+            }
+
+            // 🌟 剛性初始鎖：一開網頁，先全面強制將所有群組都設定為「展開狀態的大字米黃底」
+            const allGroups = ["50", "35", "34", "33", "32", "31", "30", "25", "10"];
+            allGroups.forEach(gName => {
+                const btn = document.getElementById(`toggle-btn-${gName}`);
+                if (btn) {
+                    btn.style.backgroundColor = '#FFFBF0';
+                    btn.style.fontSize = '1.1rem';
+                    btn.style.fontWeight = 'bold';
+                }
+            });
+
+            // 隨後，僅對用不到的群組自動執行摺疊（點擊後自動切換成小字灰底）
+            const autoCollapseGroups = ["34", "33", "32", "31", "30"];
+            autoCollapseGroups.forEach(gName => {
+                const btn = document.getElementById(`toggle-btn-${gName}`);
+                if (btn) {
+                    window.toggleAuraGroup(gName, btn);
+                }
+            });
         });
     </script>
     <script>
@@ -1906,6 +2154,25 @@
                 });
         });
     </script>
+
+    <div id="tree-big-preview" style="
+        position: fixed;
+        left: 600px;
+        top: 21%;
+        width: 40vw;
+        height: 75vh;
+        background-color: transparent;
+        border: none;
+        display: none;
+        z-index: 3000;
+        align-items: flex-start; /* 🎯 新增：讓圖片在垂直方向也絕對靠上貼齊 */
+        justify-content: flex-start; /* 圖片水平靠左 */
+        padding: 0;
+        pointer-events: none;
+    ">
+        <img id="tree-big-img" src="" style="max-width: 100%; max-height: 100%; object-fit: contain;">
+    </div>
+
 </body>
 
 </html>

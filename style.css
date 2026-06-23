@@ -325,8 +325,8 @@ input[type="checkbox"] {
     display: block;
     margin: 0 auto;
     cursor: pointer;
-    width: 14px;
-    height: 14px;
+    width: 20px;
+    height: 20px;
 }
 
 .cost-td {
