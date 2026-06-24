@@ -2076,6 +2076,12 @@
                         }
                     });
 
+                    // 🌟 【新增修復鎖】讀取歷史紀錄後，手動觸發指南圖片拉桿更新
+                    const zoomSlider = document.getElementById("guide-zoom-slider");
+                    if (zoomSlider) {
+                        zoomSlider.dispatchEvent(new Event("input"));
+                    }
+
                     // 🌟 核心記憶同步：因為手動輸入欄位有特定的文字/數字型態切換邏輯，讀檔時必須補觸發一次切換
                     if (typeof toggleGlobalOverride === "function") {
                         toggleGlobalOverride();
@@ -2083,6 +2089,7 @@
                 } catch (e) {
                     console.error("讀取歷史配裝失敗:", e);
                 }
+
             } else {
                 // 如果是全新開網頁沒有任何紀錄，才執行初始存檔
                 saveState();
