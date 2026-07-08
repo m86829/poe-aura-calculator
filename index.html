@@ -1991,6 +1991,8 @@
 
             let pctLifePoints = Math.floor((baseLife * sumPctLife) / 100);
             let pctManaPoints = Math.floor((baseMana * sumPctMana) / 100);
+
+            // 【還原】網頁版公式必須扣除百分比點數與固定值實體點數，網頁數據才會正確歸位
             const finalLife = baseLife - pctLifePoints - flatLifeSum;
             const finalMana = baseMana - pctManaPoints - flatManaSum;
 
@@ -2013,24 +2015,29 @@
             const domLifeReserve = document.getElementById('ball-life-reserve');
             const domManaReserve = document.getElementById('ball-mana-reserve');
 
+            // 【解鎖】生命保留：不限最高 100%，允許真實反映破百數據
             let reserveLifePct = sumPctLife;
             if (baseLife > 0 && flatLifeSum > 0) {
                 reserveLifePct += (flatLifeSum / baseLife) * 100;
             }
-            reserveLifePct = Math.max(0, Math.min(100, reserveLifePct));
+            reserveLifePct = Math.max(0, reserveLifePct); // 只限制下限不為負數
 
+            // 【解鎖】魔力保留：不限最高 100%，允許真實反映破百數據
             let reserveManaPct = sumPctMana;
             if (baseMana > 0 && flatManaSum > 0) {
                 reserveManaPct += (flatManaSum / baseMana) * 100;
             }
-            reserveManaPct = Math.max(0, Math.min(100, reserveManaPct));
+            reserveManaPct = Math.max(0, reserveManaPct); // 只限制下限不為負數
 
+            // 圖片黑罩部分引入安全鎖（確保數值在 0 ~ 100 之間，防止黑罩超出範圍破圖）
             if (domLifeReserve) {
-                let cutBottomLife = 100 - reserveLifePct;
+                let ballLifePctForVisual = Math.min(100, reserveLifePct);
+                let cutBottomLife = 100 - ballLifePctForVisual;
                 domLifeReserve.style.clipPath = "inset(0% 0% " + cutBottomLife + "% 0%)";
             }
             if (domManaReserve) {
-                let cutBottomMana = 100 - reserveManaPct;
+                let ballManaPctForVisual = Math.min(100, reserveManaPct);
+                let cutBottomMana = 100 - ballManaPctForVisual;
                 domManaReserve.style.clipPath = "inset(0% 0% " + cutBottomMana + "% 0%)";
             }
 
@@ -2260,20 +2267,18 @@
                         ctx.font = '13px "Courier New", monospace';
                         ctx.fillText('(https://poe-aura-calculator.pages.dev/)', 25 + titleWidth + 8, 45);
 
-                        // 🎯 修正：捨棄模糊的樣式搜尋，直接精準抓取網頁血魔球的真實保留結果元件
-                        let lifeReservedVal = 0;
-                        let manaReservedVal = 0;
+                        // 🎯 【解鎖】在 Canvas 內部動態將「純百分比保留」與「固定值實體保留」換算為 % 後加總
+                        const maxLifeNumForCalc = parseFloat(String(baseLife).replace(/,/g, '')) || 0;
+                        const maxManaNumForCalc = parseFloat(String(baseMana).replace(/,/g, '')) || 0;
 
-                        const lifeResEl = document.getElementById('ball-life-text-res');
-                        const manaResEl = document.getElementById('ball-mana-text-res');
-
-                        if (lifeResEl) {
-                            // 從 "Reserved: 45.20%" 中過濾出數字 45.20
-                            lifeReservedVal = parseFloat(lifeResEl.innerText.replace(/[^\d.]/g, "")) || 0;
+                        let lifeReservedVal = globalSumPctLife;
+                        if (maxLifeNumForCalc > 0 && globalFlatLifeSum > 0) {
+                            lifeReservedVal += (globalFlatLifeSum / maxLifeNumForCalc) * 100;
                         }
-                        if (manaResEl) {
-                            // 從 "Reserved: 85.00%" 中過濾出數字 85.00
-                            manaReservedVal = parseFloat(manaResEl.innerText.replace(/[^\d.]/g, "")) || 0;
+
+                        let manaReservedVal = globalSumPctMana;
+                        if (maxManaNumForCalc > 0 && globalFlatManaSum > 0) {
+                            manaReservedVal += (globalFlatManaSum / maxManaNumForCalc) * 100;
                         }
 
                         const boardY = 65;
@@ -2316,37 +2321,42 @@
                         // 先畫底層全紅滿血球
                         ctx.drawImage(imgLifeFull, lX, lY, ballSize, ballSize);
 
-                        // 保留多少 %，黑罩就從頭頂往下覆蓋多少高度
-                        const lifeReservePercent = Math.max(0, Math.min(100, lifeReservedVal)) / 100;
-                        if (lifeReservePercent > 0) {
+                        // 🚀 1. 宣告真實保留比例（不鎖死，用於文字與實體點數計算）
+                        const lifeReservePercentReal = lifeReservedVal / 100;
+
+                        // 🚀 2. 宣告遮罩專用比例（鎖死在 0% ~ 100% 之間，防止黑罩反向裁剪或破圖）
+                        const lifeReservePercentForBall = Math.max(0, Math.min(1, lifeReservePercentReal));
+
+                        if (lifeReservePercentForBall > 0) {
                             ctx.save();
                             ctx.beginPath();
                             ctx.arc(targetLifeX, lifeBallY, 32, 0, Math.PI * 2);
                             ctx.clip();
 
-                            const cutH = ballSize * lifeReservePercent;
-                            const sHLife = imgReserve.height * lifeReservePercent; // 修正：依原圖比例動態計算裁剪高度
+                            const cutH = ballSize * lifeReservePercentForBall;
+                            const sHLife = imgReserve.height * lifeReservePercentForBall;
                             ctx.drawImage(imgReserve, 0, 0, imgReserve.width, sHLife, lX, lY, ballSize, cutH);
                             ctx.restore();
                         }
 
-                        // 即時動態計算剩餘生命數值 (千分位化)
-                        const maxLifeNum = parseFloat(baseLife.replace(/,/g, '')) || 0;
-                        const currentLifeNum = Math.max(0, Math.round(maxLifeNum * (1 - lifeReservePercent)));
+                        // 🚀 3. 使用無鎖死的原始加總數據計算剩餘實體點數與固定值扣減
+                        // 【同步公式】Canvas 計算剩餘實體點數時，使用 Canvas 專屬的 lifeReservedVal，但因為 lifeReservedVal 在前一步已經包含了固定值％，這裡直接扣除即可
+                        const maxLifeNum = parseFloat(String(baseLife).replace(/,/g, '')) || 0;
+                        const pctLifePoints = Math.floor((maxLifeNum * lifeReservedVal) / 100);
+                        const currentLifeNum = maxLifeNum - pctLifePoints;
 
                         ctx.textAlign = 'center';
-                        ctx.shadowBlur = 0; // 確保無陰影殘留
+                        ctx.shadowBlur = 0;
 
-                        // 1. Reserved 百分比文字
-                        ctx.fillStyle = '#333333';
-                        ctx.font = 'bold 11px "Segoe UI", "Microsoft JhengHei", sans-serif';
+                        // 1. Reserved 百分比文字：當保留超過 100% 時剛性變紅（#dc2626），否則維持暗灰（#333333）
+                        ctx.fillStyle = lifeReservedVal > 100 ? '#dc2626' : '#333333';
+                        ctx.font = 'bold 9.5px "Segoe UI", "Microsoft JhengHei", sans-serif';
                         ctx.fillText(`Reserved: ${lifeReservedVal.toFixed(2)}%`, targetLifeX, lifeBallY - 58);
 
-                        // 2. 殘餘數值移到 Reserved 下方、球的上面，並改為純黑色
-                        ctx.fillStyle = '#000000';
-                        ctx.font = 'bold 11px "Courier New", monospace';
-                        ctx.fillText(`${currentLifeNum} / ${maxLifeNum}`, targetLifeX, lifeBallY - 42);
-
+                        // 2. 殘餘數值文字顏色判定：當數值歸零或為負數時剛性變紅（#dc2626），否則為純黑
+                        ctx.fillStyle = currentLifeNum <= 0 ? '#dc2626' : '#000000';
+                        ctx.font = 'bold 9.5px "Segoe UI", "Microsoft JhengHei", sans-serif'; // 🚀 改為跟 Reserved 一致的字體與大小
+                        ctx.fillText(`${currentLifeNum.toLocaleString()} / ${maxLifeNum.toLocaleString()}`, targetLifeX, lifeBallY - 42);
 
                         // 🎯 【魔力球】垂直精準對齊 (中心 942.5, Y軸 86)
                         const targetManaX = 942.5;
@@ -2357,35 +2367,42 @@
                         // 先畫底層全藍滿魔球
                         ctx.drawImage(imgManaFull, mX, mY, ballSize, ballSize);
 
-                        const manaReservePercent = Math.max(0, Math.min(100, manaReservedVal)) / 100;
-                        if (manaReservePercent > 0) {
+                        // 🚀 1. 宣告真實保留比例（不鎖死，用於文字與實體點數計算）
+                        const manaReservePercentReal = manaReservedVal / 100;
+
+                        // 🚀 2. 宣告遮罩專用比例（鎖死在 0% ~ 100% 之間，防止黑罩反向裁剪或破圖）
+                        const manaReservePercentForBall = Math.max(0, Math.min(1, manaReservePercentReal));
+
+                        if (manaReservePercentForBall > 0) {
                             ctx.save();
                             ctx.beginPath();
                             ctx.arc(targetManaX, manaBallY, 32, 0, Math.PI * 2);
                             ctx.clip();
 
-                            const cutH = ballSize * manaReservePercent;
-                            const sHMana = imgReserve.height * manaReservePercent; // 修正：依原圖比例動態計算裁剪高度
+                            const cutH = ballSize * manaReservePercentForBall;
+                            const sHMana = imgReserve.height * manaReservePercentForBall;
                             ctx.drawImage(imgReserve, 0, 0, imgReserve.width, sHMana, mX, mY, ballSize, cutH);
                             ctx.restore();
                         }
 
-                        // 即時動態計算剩餘魔力數值
-                        const maxManaNum = parseFloat(baseMana.replace(/,/g, '')) || 0;
-                        const currentManaNum = Math.max(0, Math.round(maxManaNum * (1 - manaReservePercent)));
+                        // 🚀 3. 使用無鎖死的原始加總數據計算剩餘實體點數與固定值扣減
+                        // 魔力球區段 【修正】移除最後重複扣除的 globalFlatManaSum
+                        const maxManaNum = parseFloat(String(baseMana).replace(/,/g, '')) || 0;
+                        const pctManaPoints = Math.floor((maxManaNum * manaReservedVal) / 100);
+                        const currentManaNum = maxManaNum - pctManaPoints;
 
                         ctx.textAlign = 'center';
-                        ctx.shadowBlur = 0; // 確保無陰影殘留
+                        ctx.shadowBlur = 0;
 
-                        // 1. Reserved 百分比文字
-                        ctx.fillStyle = '#333333';
-                        ctx.font = 'bold 11px "Segoe UI", "Microsoft JhengHei", sans-serif';
+                        // 1. Reserved 百分比文字：當保留超過 100% 時剛性變紅（#dc2626），否則維持暗灰（#333333）
+                        ctx.fillStyle = manaReservedVal > 100 ? '#dc2626' : '#333333';
+                        ctx.font = 'bold 9.5px "Segoe UI", "Microsoft JhengHei", sans-serif';
                         ctx.fillText(`Reserved: ${manaReservedVal.toFixed(2)}%`, targetManaX, manaBallY - 58);
 
-                        // 2. 殘餘數值移到 Reserved 下方、球的上面，並改為純黑色
-                        ctx.fillStyle = '#000000';
-                        ctx.font = 'bold 11px "Courier New", monospace';
-                        ctx.fillText(`${currentManaNum} / ${maxManaNum}`, targetManaX, manaBallY - 42);
+                        // 2. 殘餘數值文字顏色判定：當數值歸零或為負數時剛性變紅（#dc2626），否則為純黑
+                        ctx.fillStyle = currentManaNum <= 0 ? '#dc2626' : '#000000';
+                        ctx.font = 'bold 9.5px "Segoe UI", "Microsoft JhengHei", sans-serif'; // 🚀 改為跟 Reserved 一致的字體與大小
+                        ctx.fillText(`${currentManaNum.toLocaleString()} / ${maxManaNum.toLocaleString()}`, targetManaX, manaBallY - 42);
 
                         // 7. 大試算表雙層大標頭
                         let tableY = 125;
@@ -2450,33 +2467,32 @@
                             ctx.strokeStyle = '#777777';
                             ctx.strokeRect(25, currentY, 970, 32);
 
+                            // 判斷保留效用與下拉選單文字
                             const slotText = aura.slot !== '0' ? `${aura.slot}%` : '0%';
-                            const nlText = aura.enl !== '0' ? `${aura.enl}等` : '無';
+                            const nlText = (aura.enl !== '0' && aura.enl !== 0) ? `${aura.enl}等` : '無';
                             const multText = `${aura.mult}%`;
-                            const arrText = aura.arr === '0' ? '0(庇護盾)' : (aura.arr > 0 ? `${aura.arr}等` : '無');
-
-                            // 【修正 1】：倍率回歸純字串，網頁輸入 1 圖片就顯示 1
+                            const arrText = aura.arr === '0' || aura.arr === 0 ? '0(庇護盾)' : ((parseInt(aura.arr) > 0) ? `${aura.arr}等` : '無');
                             const supText = String(aura.sup);
 
-                            // 💡 大道至簡：直接百分之百剛性複製網頁上算好的文字（自帶 % 或 HP / MP），完全不囉唆！
                             let displayLife = aura.resLife;
                             let displayMana = aura.resMana;
 
                             let groupBase = '固定值';
                             if (!aura.isFlat) {
-                                const foundAura = AURA_CONFIG.find(a => a.name === aura.name);
+                                const foundAura = AURA_CONFIG.find(a => a.id === aura.name || a.name === aura.name);
                                 if (foundAura) groupBase = foundAura.group;
                             }
 
-                            // 【新修正】：直接透過網頁的生命保留欄位是否有值（非 '-'），來判定該光環是生命保留還是魔力保留
-                            const activeColor = aura.resLife !== '-' ? '#dc2626' : '#2563eb';
+                            // 精確判定該列是生命保留還是魔力保留（支援固定值帶有 HP / MP 字串的判定）
+                            const isLifeRes = aura.resLife !== '-' && aura.resLife !== '';
+                            const activeColor = isLifeRes ? '#dc2626' : '#2563eb';
 
-                            // 動態判定顏色鎖：若與預設值不同，立刻點亮主題色（紅或藍），否則維持預設的純黑（#000000）
+                            // 動態顏色鎖：若控制項數值與預設不同，立刻點亮主題色
                             const colorSlot = aura.slot !== '0' ? activeColor : '#000000';
-                            const colorEnl = aura.enl !== '0' ? activeColor : '#000000';
+                            const colorEnl = (aura.enl !== '0' && aura.enl !== 0) ? activeColor : '#000000';
                             const colorMult = aura.mult !== '100' ? activeColor : '#000000';
-                            const colorArr = aura.arr !== '-1' ? activeColor : '#000000';
-                            const colorSup = aura.sup !== '1' ? activeColor : '#000000';
+                            const colorArr = (aura.arr !== '-1' && aura.arr !== -1) ? activeColor : '#000000';
+                            const colorSup = (aura.sup !== '1' && aura.sup !== 1) ? activeColor : '#000000';
 
                             let itemX = 25;
                             // 保持剛性加粗，並套用全新的紅/藍動態變色變數
