@@ -1989,10 +1989,10 @@
                 }
             });
 
-            let pctLifePoints = Math.floor((baseLife * sumPctLife) / 100);
-            let pctManaPoints = Math.floor((baseMana * sumPctMana) / 100);
+            // 【修正】百分比光環換算為實體點數時，依照 PoE 遊戲真實規則改為 Math.ceil（無條件進位）
+            let pctLifePoints = Math.ceil((baseLife * sumPctLife) / 100);
+            let pctManaPoints = Math.ceil((baseMana * sumPctMana) / 100);
 
-            // 【還原】網頁版公式必須扣除百分比點數與固定值實體點數，網頁數據才會正確歸位
             const finalLife = baseLife - pctLifePoints - flatLifeSum;
             const finalMana = baseMana - pctManaPoints - flatManaSum;
 
@@ -2339,10 +2339,9 @@
                             ctx.restore();
                         }
 
-                        // 🚀 3. 使用無鎖死的原始加總數據計算剩餘實體點數與固定值扣減
-                        // 【同步公式】Canvas 計算剩餘實體點數時，使用 Canvas 專屬的 lifeReservedVal，但因為 lifeReservedVal 在前一步已經包含了固定值％，這裡直接扣除即可
+                        // 生命球文字殘餘點數計算 【修正】改為 Math.ceil 無條件進位
                         const maxLifeNum = parseFloat(String(baseLife).replace(/,/g, '')) || 0;
-                        const pctLifePoints = Math.floor((maxLifeNum * lifeReservedVal) / 100);
+                        const pctLifePoints = Math.ceil((maxLifeNum * lifeReservedVal) / 100);
                         const currentLifeNum = maxLifeNum - pctLifePoints;
 
                         ctx.textAlign = 'center';
@@ -2385,10 +2384,9 @@
                             ctx.restore();
                         }
 
-                        // 🚀 3. 使用無鎖死的原始加總數據計算剩餘實體點數與固定值扣減
-                        // 魔力球區段 【修正】移除最後重複扣除的 globalFlatManaSum
+                        // 魔力球文字殘餘點數計算 【修正】改為 Math.ceil 無條件進位
                         const maxManaNum = parseFloat(String(baseMana).replace(/,/g, '')) || 0;
-                        const pctManaPoints = Math.floor((maxManaNum * manaReservedVal) / 100);
+                        const pctManaPoints = Math.ceil((maxManaNum * manaReservedVal) / 100);
                         const currentManaNum = maxManaNum - pctManaPoints;
 
                         ctx.textAlign = 'center';
