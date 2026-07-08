@@ -7,6 +7,8 @@
     <title>PoE Aura Calculator</title>
     <link rel="icon" type="image/png" href="public/favicon.png">
 
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+
     <style>
         /* ==========================================================================
            正宗 1:1 Excel 鋼鐵置頂列與細黑線雙層標頭試算表樣式表
@@ -49,10 +51,20 @@
             padding: 0 10px;
         }
 
+        /* 🌟 新增：解除擷取層對 sticky 的刚性封鎖，使其退化為純透明外殼 */
+        #capture-zone {
+            display: contents;
+            /* 💡 核心魔法：讓這個 div 在瀏覽器排版時「隱形」，不作為 sticky 的父外殼，但 html2canvas 依舊抓得到它！ */
+        }
+
         /* CSS 新片段 (請將 gap 改為 25px，並加上 min-width 防止過度擠壓) */
         .mega-sticky-header {
             position: sticky;
             top: 0;
+            left: 0;
+            /* 🌟 剛性鎖死橫向起點，防止 zoom 1.25 產生水平滾動時移位 */
+            width: 100%;
+            /* 🌟 強制橫向 100% 滿版 */
             z-index: 2000;
             background-color: #ffffff;
             border-bottom: 2px solid #777777;
@@ -60,10 +72,9 @@
             display: flex;
             align-items: center;
             justify-content: space-between;
-            gap: 40px;
-            /* 新的防撞間距 */
+            gap: 25px;
+            /* 🌟 依你原本的註解，改為 25px 防止過度擠壓 */
             min-width: 1250px;
-            /* 確保網頁縮小時，整條置頂列不會崩潰貼死 */
         }
 
         .header-left-zone {
@@ -481,6 +492,25 @@
             height: 100%;
         }
 
+        /* 🌟 手把手新增：網頁輸入框動態變色樣式 */
+        .web-highlight-life {
+            color: #dc2626 !important;
+            /* 生命紅文字 */
+            border-color: #fca5a5 !important;
+            /* 淡紅邊框 */
+            background-color: #fff5f5 !important;
+            /* 淡淡的紅底襯托 */
+        }
+
+        .web-highlight-mana {
+            color: #2563eb !important;
+            /* 魔力藍文字 */
+            border-color: #93c5fd !important;
+            /* 淡藍邊框 */
+            background-color: #f0f7ff !important;
+            /* 淡淡的藍底襯托 */
+        }
+
         .inline-lv {
             display: inline-block !important;
             width: 38px !important;
@@ -721,316 +751,363 @@
 
 <body>
     <div class="excel-wrapper">
-        <header class="mega-sticky-header">
-            <div class="header-left-zone">
-                <a href="#" onclick="switchTab('tab-calculator'); return false;" class="excel-logo">Poe
-                    Aura-Calculator</a>
-                <div class="history-controls" id="anchor-history-box"
-                    style="display: flex; gap: 3px; margin-top: 14px; align-items: center;">
-                    <button class="excel-btn-reset" style="background-color: #f5eb69; color: #8a0303;"
-                        onclick="resetAllToDefault()">🧹全表回歸預設</button>
-                    <button class="excel-btn-sm" onclick="undo()">↶</button>
-                    <button class="excel-btn-sm" onclick="redo()">↷</button>
-                    <button class="excel-btn-sm" style="background-color: #f5eb69; color: #8a0303;"
-                        onclick="resetCurrentTabOnly()">單頁清除鍵</button>
-                </div>
-            </div>
+        <div id="capture-zone" style="background-color: #ffffff; padding: 10px 10px 1px 10px;">
 
-            <div class="header-center-dashboard"
-                style="display: flex; align-items: center; justify-content: center; flex: 1;">
-                <div style="display: flex; align-items: flex-end; position: relative;">
+            <header class="mega-sticky-header">
+                <div class="header-left-zone">
+                    <a href="#" onclick="switchTab('tab-calculator'); return false;" class="excel-logo">Poe
+                        Aura-Calculator</a>
+                    <div class="history-controls" id="anchor-history-box"
+                        style="display: flex; gap: 3px; margin-top: 14px; align-items: center;">
+                        <!-- 💡 要替換的新程式碼片段 -->
+                        <!-- 全表回歸預設：鎖死寬度 110px，文字維持單行 -->
+                        <button class="excel-btn-reset"
+                            style="background-color: #f5eb69; color: #8a0303; width: 110px; white-space: nowrap;"
+                            onclick="resetAllToDefault()">🧹全表回歸預設</button>
+                        <button class="excel-btn-sm" onclick="undo()">↶</button>
+                        <button class="excel-btn-sm" onclick="redo()">↷</button>
+                        <!-- 單頁清除鍵：鎖死寬度 85px，文字維持單行 -->
+                        <button class="excel-btn-sm"
+                            style="background-color: #f5eb69; color: #8a0303; width: 85px; white-space: nowrap;"
+                            onclick="resetCurrentTabOnly()">單頁清除鍵</button>
 
-                    <div class="excel-cell-card panel-life"
-                        style="width: 80px; min-width: 80px; height: 110px; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 0; border: none; background-color: transparent; margin: 0; position: relative;">
-                        <div id="ball-life-text-panel"
-                            style="width: 200px; position: absolute; top: 0; display: flex; flex-direction: column; justify-content: center; align-items: center; pointer-events: none; color: #000000; font-family: 'Segoe UI', Arial, sans-serif; font-weight: bold; font-size: 0.95rem; line-height: 1.3; text-align: center;">
-                            <span id="ball-life-text-res">Reserved: 0%</span>
-                            <span id="ball-life-text-pts">Life: 4000 / 4000</span>
-                        </div>
-                        <div
-                            style="width: 65px; height: 65px; position: absolute; bottom: 0; overflow: hidden; border-radius: 50%;">
+                        <!-- 📥 箭頭往下：下載純文字配置單 -->
+                        <button id="btn-download-config" title="下載純文字配置單"
+                            style="background: linear-gradient(to bottom, #0ea5e9, #0284c7); border: 1px solid #0369a1; box-shadow: 0 2px 4px rgba(0,0,0,0.15), inset 0 1px 0 rgba(255,255,255,0.3); border-radius: 4px; width: 28px; height: 25px; display: inline-flex; align-items: center; justify-content: center; cursor: pointer; padding: 0; margin-left: 6px; vertical-align: middle;">
                             <div
-                                style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; background-image: url('./public/trees/life-full.png'); background-size: contain; background-position: center; background-repeat: no-repeat;">
+                                style="position: relative; width: 12px; height: 12px; display: flex; flex-direction: column; align-items: center; justify-content: center;">
+                                <div style="width: 3px; height: 7px; background-color: #ffffff; border-radius: 1px;">
+                                </div>
+                                <div
+                                    style="width: 0; height: 0; border-left: 5px solid transparent; border-right: 5px solid transparent; border-top: 5px solid #ffffff; margin-top: -2px;">
+                                </div>
+                                <div
+                                    style="width: 11px; height: 1.5px; background-color: #ffffff; margin-top: 1.5px; border-radius: 1px;">
+                                </div>
                             </div>
-                            <div id="ball-life-reserve"
-                                style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; background-image: url('./public/trees/globe-reserve.png'); background-size: contain; background-position: center; background-repeat: no-repeat; clip-path: inset(0% 0% 100% 0%); transition: clip-path 0.1s ease-out;">
-                            </div>
-                        </div>
-                    </div>
+                        </button>
 
-                    <div style="width: 120px; min-width: 120px;"></div>
-
-                    <div class="excel-cell-card panel-mana"
-                        style="width: 80px; min-width: 80px; height: 110px; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 0; border: none; background-color: transparent; margin: 0; position: relative;">
-                        <div id="ball-mana-text-panel"
-                            style="width: 200px; position: absolute; top: 0; display: flex; flex-direction: column; justify-content: center; align-items: center; pointer-events: none; color: #000000; font-family: 'Segoe UI', Arial, sans-serif; font-weight: bold; font-size: 0.95rem; line-height: 1.3; text-align: center;">
-                            <span id="ball-mana-text-res">Reserved: 0%</span>
-                            <span id="ball-mana-text-pts">Mana: 1000 / 1000</span>
-                        </div>
-                        <div
-                            style="width: 65px; height: 65px; position: absolute; bottom: 0; overflow: hidden; border-radius: 50%;">
+                        <!-- 📤 箭頭往上：複製分享網址 -->
+                        <button id="btn-upload-config" title="上傳配裝字卡還原數據"
+                            style="background: linear-gradient(to bottom, #0ea5e9, #0284c7); border: 1px solid #0369a1; box-shadow: 0 2px 4px rgba(0,0,0,0.15), inset 0 1px 0 rgba(255,255,255,0.3); border-radius: 4px; width: 28px; height: 25px; display: inline-flex; align-items: center; justify-content: center; cursor: pointer; padding: 0; margin-left: 4px; vertical-align: middle;">
                             <div
-                                style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; background-image: url('./public/trees/mana-full.png'); background-size: contain; background-position: center; background-repeat: no-repeat;">
+                                style="position: relative; width: 12px; height: 12px; display: flex; flex-direction: column; align-items: center; justify-content: center;">
+                                <div
+                                    style="width: 11px; height: 1.5px; background-color: #ffffff; margin-bottom: 1.5px; border-radius: 1px;">
+                                </div>
+                                <div
+                                    style="width: 0; height: 0; border-left: 5px solid transparent; border-right: 5px solid transparent; border-bottom: 5px solid #ffffff; margin-bottom: -2px;">
+                                </div>
+                                <div style="width: 3px; height: 7px; background-color: #ffffff; border-radius: 1px;">
+                                </div>
                             </div>
-                            <div id="ball-mana-reserve"
-                                style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; background-image: url('./public/trees/globe-reserve.png'); background-size: contain; background-position: center; background-repeat: no-repeat; clip-path: inset(0% 0% 100% 0%); transition: clip-path 0.1s ease-out;">
+                        </button>
+                    </div>
+                </div>
+
+                <div class="header-center-dashboard"
+                    style="display: flex; align-items: center; justify-content: center; flex: 1;">
+                    <div style="display: flex; align-items: flex-end; position: relative;">
+
+                        <div class="excel-cell-card panel-life"
+                            style="width: 80px; min-width: 80px; height: 110px; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 0; border: none; background-color: transparent; margin: 0; position: relative;">
+                            <div id="ball-life-text-panel"
+                                style="width: 200px; position: absolute; top: 0; display: flex; flex-direction: column; justify-content: center; align-items: center; pointer-events: none; color: #000000; font-family: 'Segoe UI', Arial, sans-serif; font-weight: bold; font-size: 0.95rem; line-height: 1.3; text-align: center;">
+                                <span id="ball-life-text-res">Reserved: 0%</span>
+                                <span id="ball-life-text-pts">Life: 4000 / 4000</span>
+                            </div>
+                            <div
+                                style="width: 65px; height: 65px; position: absolute; bottom: 0; overflow: hidden; border-radius: 50%;">
+                                <div
+                                    style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; background-image: url('./public/trees/life-full.png'); background-size: contain; background-position: center; background-repeat: no-repeat;">
+                                </div>
+                                <div id="ball-life-reserve"
+                                    style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; background-image: url('./public/trees/globe-reserve.png'); background-size: contain; background-position: center; background-repeat: no-repeat; clip-path: inset(0% 0% 100% 0%); transition: clip-path 0.1s ease-out;">
+                                </div>
+                            </div>
+                        </div>
+
+                        <div style="width: 120px; min-width: 120px;"></div>
+
+                        <div class="excel-cell-card panel-mana"
+                            style="width: 80px; min-width: 80px; height: 110px; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 0; border: none; background-color: transparent; margin: 0; position: relative;">
+                            <div id="ball-mana-text-panel"
+                                style="width: 200px; position: absolute; top: 0; display: flex; flex-direction: column; justify-content: center; align-items: center; pointer-events: none; color: #000000; font-family: 'Segoe UI', Arial, sans-serif; font-weight: bold; font-size: 0.95rem; line-height: 1.3; text-align: center;">
+                                <span id="ball-mana-text-res">Reserved: 0%</span>
+                                <span id="ball-mana-text-pts">Mana: 1000 / 1000</span>
+                            </div>
+                            <div
+                                style="width: 65px; height: 65px; position: absolute; bottom: 0; overflow: hidden; border-radius: 50%;">
+                                <div
+                                    style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; background-image: url('./public/trees/mana-full.png'); background-size: contain; background-position: center; background-repeat: no-repeat;">
+                                </div>
+                                <div id="ball-mana-reserve"
+                                    style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; background-image: url('./public/trees/globe-reserve.png'); background-size: contain; background-position: center; background-repeat: no-repeat; clip-path: inset(0% 0% 100% 0%); transition: clip-path 0.1s ease-out;">
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="panel-effect-summary"
+                            style="align-self: center; height: auto; width: 170px; min-width: 170px; display: flex; flex-direction: column; justify-content: center; align-items: stretch; border: 1px solid #777777; background-color: #f8fafc; padding: 12px 16px; gap: 6px; border-radius: 2px; margin-left: 110px; margin-bottom: -4px;">
+                            <div
+                                style="display: flex; justify-content: space-between; align-items: center; font-size: 0.8rem; font-weight: bold; white-space: nowrap;">
+                                <span style="color: #A11CCA;">光環效果加成</span>
+                                <span id="summary-effect-calc"
+                                    style="color: #1e3a8a; font-family: monospace; font-size: 0.95rem;">0%</span>
+                            </div>
+                            <div style="border-top: 1px dashed #cccccc; margin: 1px 0;"></div>
+                            <div
+                                style="display: flex; justify-content: space-between; align-items: center; font-size: 0.8rem; font-weight: bold; white-space: nowrap;">
+                                <span style="color: #c2410c;">生命保留效用</span>
+                                <span id="summary-life-eff-calc"
+                                    style="color: #c2410c; font-family: monospace; font-size: 0.95rem;">0%</span>
+                            </div>
+                            <div style="border-top: 1px dashed #cccccc; margin: 1px 0;"></div>
+                            <div
+                                style="display: flex; justify-content: space-between; align-items: center; font-size: 0.8rem; font-weight: bold; white-space: nowrap;">
+                                <span style="color: #2563eb;">魔力保留效用</span>
+                                <span id="summary-mana-eff-calc"
+                                    style="color: #2563eb; font-family: monospace; font-size: 0.95rem;">0%</span>
                             </div>
                         </div>
                     </div>
+                </div>
 
-                    <div class="panel-effect-summary"
-                        style="align-self: center; height: auto; width: 170px; min-width: 170px; display: flex; flex-direction: column; justify-content: center; align-items: stretch; border: 1px solid #777777; background-color: #f8fafc; padding: 12px 16px; gap: 6px; border-radius: 2px; margin-left: 110px; margin-bottom: -4px;">
-                        <div
-                            style="display: flex; justify-content: space-between; align-items: center; font-size: 0.8rem; font-weight: bold; white-space: nowrap;">
-                            <span style="color: #A11CCA;">光環效果加成</span>
-                            <span id="summary-effect-calc"
-                                style="color: #1e3a8a; font-family: monospace; font-size: 0.95rem;">0%</span>
-                        </div>
-                        <div style="border-top: 1px dashed #cccccc; margin: 1px 0;"></div>
-                        <div
-                            style="display: flex; justify-content: space-between; align-items: center; font-size: 0.8rem; font-weight: bold; white-space: nowrap;">
-                            <span style="color: #c2410c;">生命保留效用</span>
-                            <span id="summary-life-eff-calc"
-                                style="color: #c2410c; font-family: monospace; font-size: 0.95rem;">0%</span>
-                        </div>
-                        <div style="border-top: 1px dashed #cccccc; margin: 1px 0;"></div>
-                        <div
-                            style="display: flex; justify-content: space-between; align-items: center; font-size: 0.8rem; font-weight: bold; white-space: nowrap;">
-                            <span style="color: #2563eb;">魔力保留效用</span>
-                            <span id="summary-mana-eff-calc"
-                                style="color: #2563eb; font-family: monospace; font-size: 0.95rem;">0%</span>
-                        </div>
+                <div class="header-right-zone">
+                    <nav class="nav-links">
+                        <button class="nav-btn" id="btn-tab-user-guide" onclick="switchTab('tab-user-guide')"
+                            style="color: #334155; font-weight: bold;">使用指南</button>
+                        <button class="nav-btn" id="btn-tab-tree" onclick="switchTab('tab-tree')">天賦來源</button>
+                        <button class="nav-btn" id="btn-tab-gear" onclick="switchTab('tab-gear')">裝備來源</button>
+                        <button class="nav-btn active" id="btn-tab-calculator"
+                            onclick="switchTab('tab-calculator')">光環計算機</button>
+                    </nav>
+                </div>
+            </header>
+            <main class="excel-main-content">
+                <div id="tab-calculator" class="tab-content active">
+                    <div class="milton-stats-grid">
+                        <table class="milton-input-table">
+                            <tr>
+                                <td width="50%" class="label-red">請輸入你的最大生命</td>
+                                <td width="50%" class="td-yellow"><input type="number" id="base-life" value="4000"
+                                        class="bg-yellow-input"></td>
+                            </tr>
+                            <tr>
+                                <td class="label-blue">請輸入你的最大魔力</td>
+                                <td class="td-yellow"><input type="number" id="base-mana" value="1000"
+                                        class="bg-yellow-input">
+                                </td>
+                            </tr>
+                        </table>
+                        <table class="milton-display-table">
+                            <tr>
+                                <td width="40%" style="text-align: center; padding-left: 10px;">【天賦+裝備】總生命保留效用</td>
+                                <td width="20%" class="bg-pink-display" id="calc-total-life-eff">0</td>
+
+                                <td width="20%" class="td-yellow" rowspan="2"
+                                    style="border-left: 1px solid #777777; border-right: 1px solid #777777;">
+                                    <label
+                                        style="display:flex; flex-direction:column; align-items:center; cursor:pointer; font-size:0.75rem; gap:4px; font-weight: bold;">
+                                        手動輸入
+                                        <input type="checkbox" id="override-global-enable"
+                                            onchange="toggleGlobalOverride()">
+                                    </label>
+                                </td>
+
+                                <td width="20%" class="td-yellow">
+                                    <input type="text" id="override-life-input" value="-" style="text-align: center;"
+                                        disabled>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td style="text-align: center; padding-left: 10px;">【天賦+裝備】總魔力保留效用</td>
+                                <td class="bg-blue-display" id="calc-total-mana-eff">0</td>
+                                <td class="td-yellow">
+                                    <input type="text" id="override-mana-input" value="-" style="text-align: center;"
+                                        disabled>
+                                </td>
+                            </tr>
+                        </table>
                     </div>
-                </div>
-            </div>
 
-            <div class="header-right-zone">
-                <nav class="nav-links">
-                    <button class="nav-btn" id="btn-tab-user-guide" onclick="switchTab('tab-user-guide')"
-                        style="color: #334155; font-weight: bold;">使用指南</button>
-                    <button class="nav-btn" id="btn-tab-tree" onclick="switchTab('tab-tree')">天賦來源</button>
-                    <button class="nav-btn" id="btn-tab-gear" onclick="switchTab('tab-gear')">裝備來源</button>
-                    <button class="nav-btn active" id="btn-tab-calculator"
-                        onclick="switchTab('tab-calculator')">光環計算機</button>
-                </nav>
-            </div>
-        </header>
-        <main class="excel-main-content">
-            <div id="tab-calculator" class="tab-content active">
-                <div class="milton-stats-grid">
-                    <table class="milton-input-table">
-                        <tr>
-                            <td width="50%" class="label-red">請輸入你的最大生命</td>
-                            <td width="50%" class="td-yellow"><input type="number" id="base-life" value="4000"
-                                    class="bg-yellow-input"></td>
-                        </tr>
-                        <tr>
-                            <td class="label-blue">請輸入你的最大魔力</td>
-                            <td class="td-yellow"><input type="number" id="base-mana" value="1000"
-                                    class="bg-yellow-input">
-                            </td>
-                        </tr>
+                    <table class="excel-pure-table">
+                        <thead>
+                            <tr>
+                                <th colspan="8"
+                                    style="background-color: #f0e000; color: #000000; text-align: center; padding-left: 10px;">
+                                    使用者輸入區</th>
+                                <th colspan="2" style="background-color: #af1400; color: #ffffff;">最終保留結果</th>
+                            </tr>
+                            <tr>
+                                <th width="2.5%" style="background-color: #fdf9ee; color: #000000;">保留%</th>
+                                <th width="21.5%" style="background-color: #fdf9ee; color: #000000;">名稱</th>
+                                <th width="3%" style="background-color: #fdf9ee; color: #000000;">開關</th>
+                                <th width="11%" style="background-color: #fdf9ee; color: #000000;">物品插槽保留效用/<br>額外保留效用
+                                </th>
+                                <th width="8%" style="background-color: #fdf9ee; color: #000000;">啟蒙等級(1-10)</th>
+                                <th width="18%" style="background-color: #fdf9ee; color: #000000;">
+                                    插槽中的技能寶石有<br>80-100%消耗保留加成</th>
+                                <th width="15%" style="background-color: #fdf9ee; color: #000000;">
+                                    傲慢等級(1-31)/<br>元素庇護盾牌(0)
+                                </th>
+                                <th width="6%" style="background-color: #fdf9ee; color: #000000;">其他輔助<br>技能倍率</th>
+                                <th width="8%" style="background-color: #FCE4D6; color: #000000;">生命保留</th>
+                                <th width="8%" style="background-color: #DDEBF7; color: #000000;">魔力保留</th>
+                            </tr>
+                        </thead>
+                        <tbody id="pct-auras-tbody"></tbody>
                     </table>
-                    <table class="milton-display-table">
-                        <tr>
-                            <td width="40%" style="text-align: center; padding-left: 10px;">【天賦+裝備】總生命保留效用</td>
-                            <td width="20%" class="bg-pink-display" id="calc-total-life-eff">0</td>
 
-                            <td width="20%" class="td-yellow" rowspan="2"
-                                style="border-left: 1px solid #777777; border-right: 1px solid #777777;">
-                                <label
-                                    style="display:flex; flex-direction:column; align-items:center; cursor:pointer; font-size:0.75rem; gap:4px; font-weight: bold;">
-                                    手動輸入
-                                    <input type="checkbox" id="override-global-enable"
-                                        onchange="toggleGlobalOverride()">
-                                </label>
-                            </td>
-
-                            <td width="20%" class="td-yellow">
-                                <input type="text" id="override-life-input" value="-" style="text-align: center;"
-                                    disabled>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td style="text-align: center; padding-left: 10px;">【天賦+裝備】總魔力保留效用</td>
-                            <td class="bg-blue-display" id="calc-total-mana-eff">0</td>
-                            <td class="td-yellow">
-                                <input type="text" id="override-mana-input" value="-" style="text-align: center;"
-                                    disabled>
-                            </td>
-                        </tr>
+                    <div class="table-header-title"></div>
+                    <table class="excel-pure-table">
+                        <thead>
+                            <tr>
+                                <th colspan="8"
+                                    style="background-color: #f0e000; color: #000000; text-align: center; padding-left: 10px;">
+                                    使用者輸入區</th>
+                                <th colspan="2" style="background-color: #af1400; color: #ffffff;">最終保留結果</th>
+                            </tr>
+                            <tr>
+                                <th width="2.5%" style="background-color: #fdf9ee; color: #000000;">保留%</th>
+                                <th width="21.5%" style="background-color: #fdf9ee; color: #000000;">名稱</th>
+                                <th width="3%" style="background-color: #fdf9ee; color: #000000;">開關</th>
+                                <th width="11%" style="background-color: #fdf9ee; color: #000000;">物品插槽保留效用/<br>額外保留效用
+                                </th>
+                                <th width="8%" style="background-color: #fdf9ee; color: #000000;">啟蒙等級(1-10)</th>
+                                <th width="18%" style="background-color: #fdf9ee; color: #000000;">
+                                    插槽中的技能寶石有<br>80-100%消耗保留加成</th>
+                                <th width="15%" style="background-color: #fdf9ee; color: #000000;">
+                                    傲慢等級(1-31)/<br>元素庇護盾牌(0)
+                                </th>
+                                <th width="6%" style="background-color: #fdf9ee; color: #000000;">其他輔助<br>技能倍率</th>
+                                <th width="8%" style="background-color: #FCE4D6; color: #000000;">生命保留</th>
+                                <th width="8%" style="background-color: #DDEBF7; color: #000000;">魔力保留</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr class="flat-row" data-aura-type="vitality" id="row-vitality">
+                                <td class="left-group-label"
+                                    style="text-align: center; color: #475569; font-weight: bold;">
+                                    固定值</td>
+                                <td class="aura-title-flex" style="border-left: 1px solid #777777 !important;"><img
+                                        src="./public/auras/vitality.png" class="aura-icon-img">
+                                    活力等級: <input type="number" id="lv-vitality" value="20" min="1" max="35"
+                                        class="input-yellow inline-lv"></td>
+                                <td class="td-yellow" style="border-left: 1px solid #777777 !important;"><input
+                                        type="checkbox" id="chk-vitality"></td>
+                                <td class="td-yellow"><input type="number" id="eff-vitality" value="0"></td>
+                                <td class="td-yellow"><select id="enl-vitality"></select></td>
+                                <td class="td-yellow"><input type="number" id="mult-vitality" value="100"></td>
+                                <td class="td-yellow"><select id="arr-vitality"></select></td>
+                                <td class="td-yellow"><input type="number" id="sup-vitality" value="1"></td>
+                                <td class="cost-life-td" id="cost-life-vitality">-</td>
+                                <td class="cost-mana-td" id="cost-mana-vitality">-</td>
+                            </tr>
+                            <tr class="flat-row" data-aura-type="precision" id="row-precision">
+                                <td class="left-group-label"
+                                    style="text-align: center; color: #475569; font-weight: bold;">
+                                    固定值</td>
+                                <td class="aura-title-flex" style="border-left: 1px solid #777777 !important;"><img
+                                        src="./public/auras/precision.png" class="aura-icon-img">
+                                    精準等級: <input type="number" id="lv-precision" value="20" min="1" max="35"
+                                        class="input-yellow inline-lv"></td>
+                                <td class="td-yellow" style="border-left: 1px solid #777777 !important;"><input
+                                        type="checkbox" id="chk-precision"></td>
+                                <td class="td-yellow"><input type="number" id="eff-precision" value="0"></td>
+                                <td class="td-yellow"><select id="enl-precision"></select></td>
+                                <td class="td-yellow"><input type="number" id="mult-precision" value="100"></td>
+                                <td class="td-yellow"><select id="arr-precision"></select></td>
+                                <td class="td-yellow"><input type="number" id="sup-precision" value="1"></td>
+                                <td class="cost-life-td" id="cost-life-precision">-</td>
+                                <td class="cost-mana-td" id="cost-mana-precision">-</td>
+                            </tr>
+                            <tr class="flat-row" data-aura-type="clarity" id="row-clarity">
+                                <td class="left-group-label"
+                                    style="text-align: center; color: #475569; font-weight: bold;">
+                                    固定值</td>
+                                <td class="aura-title-flex" style="border-left: 1px solid #777777 !important;"><img
+                                        src="./public/auras/clarity.png" class="aura-icon-img">
+                                    清晰等級: <input type="number" id="lv-clarity" value="20" min="1" max="35"
+                                        class="input-yellow inline-lv"></td>
+                                <td class="td-yellow" style="border-left: 1px solid #777777 !important;"><input
+                                        type="checkbox" id="chk-clarity"></td>
+                                <td class="td-yellow"><input type="number" id="eff-clarity" value="0"></td>
+                                <td class="td-yellow"><select id="enl-clarity"></select></td>
+                                <td class="td-yellow"><input type="number" id="mult-clarity" value="100"></td>
+                                <td class="td-yellow"><select id="arr-clarity"></select></td>
+                                <td class="td-yellow"><input type="number" id="sup-clarity" value="1"></td>
+                                <td class="cost-life-td" id="cost-life-clarity">-</td>
+                                <td class="cost-mana-td" id="cost-mana-clarity">-</td>
+                            </tr>
+                        </tbody>
                     </table>
                 </div>
 
-                <table class="excel-pure-table">
-                    <thead>
-                        <tr>
-                            <th colspan="8"
-                                style="background-color: #f0e000; color: #000000; text-align: center; padding-left: 10px;">
-                                使用者輸入區</th>
-                            <th colspan="2" style="background-color: #af1400; color: #ffffff;">最終保留結果</th>
-                        </tr>
-                        <tr>
-                            <th width="2.5%" style="background-color: #fdf9ee; color: #000000;">保留%</th>
-                            <th width="21.5%" style="background-color: #fdf9ee; color: #000000;">名稱</th>
-                            <th width="3%" style="background-color: #fdf9ee; color: #000000;">開關</th>
-                            <th width="11%" style="background-color: #fdf9ee; color: #000000;">物品插槽保留效用/<br>額外保留效用</th>
-                            <th width="8%" style="background-color: #fdf9ee; color: #000000;">啟蒙等級(1-10)</th>
-                            <th width="18%" style="background-color: #fdf9ee; color: #000000;">
-                                插槽中的技能寶石有<br>80-100%消耗保留加成</th>
-                            <th width="15%" style="background-color: #fdf9ee; color: #000000;">傲慢等級(1-31)/<br>元素庇護盾牌(0)
-                            </th>
-                            <th width="6%" style="background-color: #fdf9ee; color: #000000;">其他輔助<br>技能倍率</th>
-                            <th width="8%" style="background-color: #FCE4D6; color: #000000;">生命保留</th>
-                            <th width="8%" style="background-color: #DDEBF7; color: #000000;">魔力保留</th>
-                        </tr>
-                    </thead>
-                    <tbody id="pct-auras-tbody"></tbody>
-                </table>
+        </div>
+        <div id="tab-gear" class="tab-content">
+            <table class="excel-pure-table" style="margin-top:10px;">
+                <thead>
+                    <tr>
+                        <th rowspan="2" width="8%" style="background-color: #f0e000;">裝備名稱</th>
+                        <th rowspan="2" width="18%" style="background-color: #f0e000;">選取裝備</th>
+                        <th colspan="2" width="24%" style="background-color: #ddebf7;">魔力保留</th>
+                        <th colspan="2" width="24%" style="background-color: #fce4d6;">生命保留</th>
+                        <th colspan="2" width="26%" style="background-color: #eddcf2;">光環效果</th>
+                    </tr>
+                    <tr>
+                        <th style="background-color: #ddebf7;">說明</th>
+                        <th style="background-color: #ddebf7;">數值自填(預設最大值)</th>
+                        <th style="background-color: #fce4d6;">說明</th>
+                        <th style="background-color: #fce4d6;">數值自填(預設最大值)</th>
+                        <th style="background-color: #eddcf2;">說明</th>
+                        <th style="background-color: #eddcf2;">數值自填(預設最大值)</th>
+                    </tr>
+                </thead>
+                <tbody id="gear-table-body"></tbody>
+            </table>
+        </div>
 
-                <div class="table-header-title"></div>
-                <table class="excel-pure-table">
-                    <thead>
-                        <tr>
-                            <th colspan="8"
-                                style="background-color: #f0e000; color: #000000; text-align: center; padding-left: 10px;">
-                                使用者輸入區</th>
-                            <th colspan="2" style="background-color: #af1400; color: #ffffff;">最終保留結果</th>
-                        </tr>
-                        <tr>
-                            <th width="2.5%" style="background-color: #fdf9ee; color: #000000;">保留%</th>
-                            <th width="21.5%" style="background-color: #fdf9ee; color: #000000;">名稱</th>
-                            <th width="3%" style="background-color: #fdf9ee; color: #000000;">開關</th>
-                            <th width="11%" style="background-color: #fdf9ee; color: #000000;">物品插槽保留效用/<br>額外保留效用</th>
-                            <th width="8%" style="background-color: #fdf9ee; color: #000000;">啟蒙等級(1-10)</th>
-                            <th width="18%" style="background-color: #fdf9ee; color: #000000;">
-                                插槽中的技能寶石有<br>80-100%消耗保留加成</th>
-                            <th width="15%" style="background-color: #fdf9ee; color: #000000;">傲慢等級(1-31)/<br>元素庇護盾牌(0)
-                            </th>
-                            <th width="6%" style="background-color: #fdf9ee; color: #000000;">其他輔助<br>技能倍率</th>
-                            <th width="8%" style="background-color: #FCE4D6; color: #000000;">生命保留</th>
-                            <th width="8%" style="background-color: #DDEBF7; color: #000000;">魔力保留</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr class="flat-row" data-aura-type="vitality" id="row-vitality">
-                            <td class="left-group-label" style="text-align: center; color: #475569; font-weight: bold;">
-                                固定值</td>
-                            <td class="aura-title-flex" style="border-left: 1px solid #777777 !important;"><img
-                                    src="./public/auras/vitality.png" class="aura-icon-img">
-                                活力等級: <input type="number" id="lv-vitality" value="20" min="1" max="35"
-                                    class="input-yellow inline-lv"></td>
-                            <td class="td-yellow" style="border-left: 1px solid #777777 !important;"><input
-                                    type="checkbox" id="chk-vitality"></td>
-                            <td class="td-yellow"><input type="number" id="eff-vitality" value="0"></td>
-                            <td class="td-yellow"><select id="enl-vitality"></select></td>
-                            <td class="td-yellow"><input type="number" id="mult-vitality" value="100"></td>
-                            <td class="td-yellow"><select id="arr-vitality"></select></td>
-                            <td class="td-yellow"><input type="number" id="sup-vitality" value="1"></td>
-                            <td class="cost-life-td" id="cost-life-vitality">-</td>
-                            <td class="cost-mana-td" id="cost-mana-vitality">-</td>
-                        </tr>
-                        <tr class="flat-row" data-aura-type="precision" id="row-precision">
-                            <td class="left-group-label" style="text-align: center; color: #475569; font-weight: bold;">
-                                固定值</td>
-                            <td class="aura-title-flex" style="border-left: 1px solid #777777 !important;"><img
-                                    src="./public/auras/precision.png" class="aura-icon-img">
-                                精準等級: <input type="number" id="lv-precision" value="20" min="1" max="35"
-                                    class="input-yellow inline-lv"></td>
-                            <td class="td-yellow" style="border-left: 1px solid #777777 !important;"><input
-                                    type="checkbox" id="chk-precision"></td>
-                            <td class="td-yellow"><input type="number" id="eff-precision" value="0"></td>
-                            <td class="td-yellow"><select id="enl-precision"></select></td>
-                            <td class="td-yellow"><input type="number" id="mult-precision" value="100"></td>
-                            <td class="td-yellow"><select id="arr-precision"></select></td>
-                            <td class="td-yellow"><input type="number" id="sup-precision" value="1"></td>
-                            <td class="cost-life-td" id="cost-life-precision">-</td>
-                            <td class="cost-mana-td" id="cost-mana-precision">-</td>
-                        </tr>
-                        <tr class="flat-row" data-aura-type="clarity" id="row-clarity">
-                            <td class="left-group-label" style="text-align: center; color: #475569; font-weight: bold;">
-                                固定值</td>
-                            <td class="aura-title-flex" style="border-left: 1px solid #777777 !important;"><img
-                                    src="./public/auras/clarity.png" class="aura-icon-img">
-                                清晰等級: <input type="number" id="lv-clarity" value="20" min="1" max="35"
-                                    class="input-yellow inline-lv"></td>
-                            <td class="td-yellow" style="border-left: 1px solid #777777 !important;"><input
-                                    type="checkbox" id="chk-clarity"></td>
-                            <td class="td-yellow"><input type="number" id="eff-clarity" value="0"></td>
-                            <td class="td-yellow"><select id="enl-clarity"></select></td>
-                            <td class="td-yellow"><input type="number" id="mult-clarity" value="100"></td>
-                            <td class="td-yellow"><select id="arr-clarity"></select></td>
-                            <td class="td-yellow"><input type="number" id="sup-clarity" value="1"></td>
-                            <td class="cost-life-td" id="cost-life-clarity">-</td>
-                            <td class="cost-mana-td" id="cost-mana-clarity">-</td>
-                        </tr>
-                    </tbody>
-                </table>
+        <div id="tab-tree" class="tab-content">
+            <table class="tree-container-box">
+                <thead>
+                    <tr>
+                        <th width="12%" style="background-color: #f0e000; font-weight: bold;">天賦位置</th>
+                        <th width="24%" style="background-color: #f0e000; font-weight: bold;">使用者勾選</th>
+                        <th width="21%" style="background-color: #ddebf7; font-weight: bold;">魔力保留效用</th>
+                        <th width="21%" style="background-color: #fce4d6; font-weight: bold;">生命保留效用</th>
+                        <th width="22%" style="background-color: #eddcf2; font-weight: bold;">光環效果</th>
+                    </tr>
+                </thead>
+                <tbody id="tree-grid-body"></tbody>
+            </table>
+        </div>
+
+        <div id="tab-user-guide" class="tab-content"
+            style="padding: 20px; background-color: #ffffff; border: 1px solid #777777; margin-top: 10px; text-align: center;">
+
+            <div class="guide-control-bar"
+                style="background-color: #f1f5f9; border: 1px solid #cbd5e1; padding: 8px 16px; margin-bottom: 20px; display: flex; align-items: center; justify-content: center; gap: 12px; border-radius: 2px;">
+                <span style="font-size: 0.85rem; font-weight: bold; color: #334155;">🔍 圖片顯示大小：</span>
+                <input type="range" id="guide-zoom-slider" min="50" max="100" value="100"
+                    style="cursor: pointer; width: 200px;">
+                <span id="guide-zoom-val"
+                    style="font-size: 0.85rem; font-weight: bold; color: #1e3a8a; font-family: monospace; width: 45px; text-align: left;">100%</span>
             </div>
 
-            <div id="tab-gear" class="tab-content">
-                <table class="excel-pure-table" style="margin-top:10px;">
-                    <thead>
-                        <tr>
-                            <th rowspan="2" width="8%" style="background-color: #f0e000;">裝備名稱</th>
-                            <th rowspan="2" width="18%" style="background-color: #f0e000;">選取裝備</th>
-                            <th colspan="2" width="24%" style="background-color: #ddebf7;">魔力保留</th>
-                            <th colspan="2" width="24%" style="background-color: #fce4d6;">生命保留</th>
-                            <th colspan="2" width="26%" style="background-color: #eddcf2;">光環效果</th>
-                        </tr>
-                        <tr>
-                            <th style="background-color: #ddebf7;">說明</th>
-                            <th style="background-color: #ddebf7;">數值自填(預設最大值)</th>
-                            <th style="background-color: #fce4d6;">說明</th>
-                            <th style="background-color: #fce4d6;">數值自填(預設最大值)</th>
-                            <th style="background-color: #eddcf2;">說明</th>
-                            <th style="background-color: #eddcf2;">數值自填(預設最大值)</th>
-                        </tr>
-                    </thead>
-                    <tbody id="gear-table-body"></tbody>
-                </table>
+            <div style="margin-bottom: 20px;">
+                <img src="public/guide1.png" alt="使用指南 1" class="guide-img"
+                    style="width: 100%; max-width: 100%; height: auto; border: 1px solid #cbd5e1; box-shadow: 0 2px 4px rgba(0,0,0,0.05); transition: width 0.1s ease;">
             </div>
-
-            <div id="tab-tree" class="tab-content">
-                <table class="tree-container-box">
-                    <thead>
-                        <tr>
-                            <th width="12%" style="background-color: #f0e000; font-weight: bold;">天賦位置</th>
-                            <th width="24%" style="background-color: #f0e000; font-weight: bold;">使用者勾選</th>
-                            <th width="21%" style="background-color: #ddebf7; font-weight: bold;">魔力保留效用</th>
-                            <th width="21%" style="background-color: #fce4d6; font-weight: bold;">生命保留效用</th>
-                            <th width="22%" style="background-color: #eddcf2; font-weight: bold;">光環效果</th>
-                        </tr>
-                    </thead>
-                    <tbody id="tree-grid-body"></tbody>
-                </table>
+            <div style="margin-bottom: 20px;">
+                <img src="public/guide2.png" alt="使用指南 2" class="guide-img"
+                    style="width: 100%; max-width: 100%; height: auto; border: 1px solid #cbd5e1; box-shadow: 0 2px 4px rgba(0,0,0,0.05); transition: width 0.1s ease;">
             </div>
-
-            <div id="tab-user-guide" class="tab-content"
-                style="padding: 20px; background-color: #ffffff; border: 1px solid #777777; margin-top: 10px; text-align: center;">
-
-                <div class="guide-control-bar"
-                    style="background-color: #f1f5f9; border: 1px solid #cbd5e1; padding: 8px 16px; margin-bottom: 20px; display: flex; align-items: center; justify-content: center; gap: 12px; border-radius: 2px;">
-                    <span style="font-size: 0.85rem; font-weight: bold; color: #334155;">🔍 圖片顯示大小：</span>
-                    <input type="range" id="guide-zoom-slider" min="50" max="100" value="100"
-                        style="cursor: pointer; width: 200px;">
-                    <span id="guide-zoom-val"
-                        style="font-size: 0.85rem; font-weight: bold; color: #1e3a8a; font-family: monospace; width: 45px; text-align: left;">100%</span>
-                </div>
-
-                <div style="margin-bottom: 20px;">
-                    <img src="public/guide1.png" alt="使用指南 1" class="guide-img"
-                        style="width: 100%; max-width: 100%; height: auto; border: 1px solid #cbd5e1; box-shadow: 0 2px 4px rgba(0,0,0,0.05); transition: width 0.1s ease;">
-                </div>
-                <div style="margin-bottom: 20px;">
-                    <img src="public/guide2.png" alt="使用指南 2" class="guide-img"
-                        style="width: 100%; max-width: 100%; height: auto; border: 1px solid #cbd5e1; box-shadow: 0 2px 4px rgba(0,0,0,0.05); transition: width 0.1s ease;">
-                </div>
-                <div>
-                    <img src="public/guide3.png" alt="使用指南 3" class="guide-img"
-                        style="width: 100%; max-width: 100%; height: auto; border: 1px solid #cbd5e1; box-shadow: 0 2px 4px rgba(0,0,0,0.05); transition: width 0.1s ease;">
-                </div>
+            <div>
+                <img src="public/guide3.png" alt="使用指南 3" class="guide-img"
+                    style="width: 100%; max-width: 100%; height: auto; border: 1px solid #cbd5e1; box-shadow: 0 2px 4px rgba(0,0,0,0.05); transition: width 0.1s ease;">
             </div>
+        </div>
 
     </div>
 
@@ -1659,6 +1736,12 @@
             calculateAura();
         }
 
+        // 💡 要替換的新程式碼片段：宣告全域變數快照鎖
+        let globalSumPctLife = 0;
+        let globalSumPctMana = 0;
+        let globalFlatLifeSum = 0;
+        let globalFlatManaSum = 0;
+
         function calculateAura() {
             let treeMRes = 0, treeLRes = 0, treeEff = 0;
             TREE_CONFIG.forEach(t => {
@@ -1768,25 +1851,30 @@
             let sumPctLife = 0, sumPctMana = 0;
             let flatLifeSum = 0, flatManaSum = 0;
 
-            // 處理百分比光環的保留計算
+            // 處理百分比光環的保留計算（網頁即時變色流暢完全體）
             document.querySelectorAll('.pct-row').forEach(row => {
                 const id = row.id.replace('row-', '');
                 const isChecked = document.getElementById(`chk-${id}`).checked;
                 const dispLife = document.getElementById(`cost-life-${id}`);
                 const dispMana = document.getElementById(`cost-mana-${id}`);
 
+                // 抓取該列網頁中所有的輸入控制項元素
+                const elSlot = document.getElementById(`eff-${id}`);
+                const elEnl = document.getElementById(`enl-${id}`);
+                const elMult = document.getElementById(`mult-${id}`);
+                const elArr = document.getElementById(`arr-${id}`);
+                const elSup = document.getElementById(`sup-${id}`);
+
                 if (isChecked) {
                     let basePct = parseFloat(row.getAttribute('data-base')) || 0;
-                    const slotEff = parseFloat(document.getElementById(`eff-${id}`).value) || 0;
-                    const enlLv = parseInt(document.getElementById(`enl-${id}`).value) || 0;
-                    const gemMult = parseFloat(document.getElementById(`mult-${id}`).value) || 100;
-                    const extraSupportMult = parseFloat(document.getElementById(`sup-${id}`).value) || 1.0;
+                    const slotEff = parseFloat(elSlot.value) || 0;
+                    const enlLv = parseInt(elEnl.value) || 0;
+                    const gemMult = parseFloat(elMult.value) || 100;
+                    const extraSupportMult = parseFloat(elSup.value) || 1.0;
 
-                    const arrSelect = document.getElementById(`arr-${id}`);
-                    const arrLv = arrSelect ? parseInt(arrSelect.value) : -1;
+                    const arrLv = elArr ? parseInt(elArr.value) : -1;
 
                     let enlMultiplier = (enlLv > 0 && POEDB.enlighten[enlLv] !== undefined) ? POEDB.enlighten[enlLv] : 1.0;
-
                     let arrMultiplier = 1.0;
                     let isLifeReservation = false;
 
@@ -1797,6 +1885,16 @@
                         arrMultiplier = POEDB.arrogance[arrLv];
                         isLifeReservation = true;
                     }
+
+                    // 💡 【全新核心】：動態判斷網頁要亮紅色（生命）還是藍色（魔力）
+                    const webHighlight = isLifeReservation ? 'web-highlight-life' : 'web-highlight-mana';
+
+                    // 💡 如果目前的數值被修改過（不是預設值），就塞入變色 CSS，否則清除變色
+                    if (elSlot) elSlot.className = slotEff !== 0 ? webHighlight : '';
+                    if (elEnl) elEnl.className = enlLv !== 0 ? webHighlight : '';
+                    if (elMult) elMult.className = gemMult !== 100 ? webHighlight : '';
+                    if (elArr) elArr.className = arrLv !== -1 ? webHighlight : '';
+                    if (elSup) elSup.className = extraSupportMult !== 1 ? webHighlight : '';
 
                     if (isLifeReservation) {
                         let finalPct = (basePct * arrMultiplier * enlMultiplier * (gemMult / 100) * extraSupportMult * 100) / (100 + finalLifeEff + slotEff);
@@ -1806,40 +1904,50 @@
                         if (dispMana) dispMana.innerText = "-";
                     } else {
                         let finalPct = (basePct * enlMultiplier * (gemMult / 100) * extraSupportMult * 100) / (100 + finalManaEff + slotEff);
-                        finalPct = Math.floor(finalPct * 10000) / 10000;
-                        sumPctMana += finalPct;
+                        finalPct = Math.floor(finalPct * 10000) / 10000; sumPctMana += finalPct;
                         if (dispMana) dispMana.innerText = `${finalPct.toFixed(2)}%`;
                         if (dispLife) dispLife.innerText = "-";
                     }
                 } else {
                     if (dispLife) dispLife.innerText = "-";
                     if (dispMana) dispMana.innerText = "-";
+                    // 如果沒勾選，把變色 Class 全部洗掉回歸預設白底
+                    if (elSlot) elSlot.className = '';
+                    if (elEnl) elEnl.className = '';
+                    if (elMult) elMult.className = '';
+                    if (elArr) elArr.className = '';
+                    if (elSup) elSup.className = '';
                 }
             });
 
-            // 處理固定數值光環（活力、精準、清晰）的保留計算
+            // 處理固定值光環（活力、精準、清晰）的保留計算（網頁即時變色流暢完全體）
             document.querySelectorAll('.flat-row').forEach(row => {
                 const aura = row.getAttribute('data-aura-type');
                 const isChecked = document.getElementById(`chk-${aura}`).checked;
                 const dispLife = document.getElementById(`cost-life-${aura}`);
                 const dispMana = document.getElementById(`cost-mana-${aura}`);
 
+                // 抓取該列網頁中的控制項元素
+                const elSlot = document.getElementById(`eff-${aura}`);
+                const elEnl = document.getElementById(`enl-${aura}`);
+                const elMult = document.getElementById(`mult-${aura}`);
+                const elArr = document.getElementById(`arr-${aura}`);
+                const elSup = document.getElementById(`sup-${aura}`);
+
                 if (isChecked) {
                     const lv = parseInt(document.getElementById(`lv-${aura}`).value) || 20;
-                    const slotEff = parseFloat(document.getElementById(`eff-${aura}`).value) || 0;
-                    const enlLv = parseInt(document.getElementById(`enl-${aura}`).value) || 0;
-                    const gemMult = parseFloat(document.getElementById(`mult-${aura}`).value) || 100;
+                    const slotEff = parseFloat(elSlot.value) || 0;
+                    const enlLv = parseInt(elEnl.value) || 0;
+                    const gemMult = parseFloat(elMult.value) || 100;
 
-                    const arrSelect = document.getElementById(`arr-${aura}`);
-                    const arrLv = arrSelect ? parseInt(arrSelect.value) : -1;
-                    const extraSupportMult = parseFloat(document.getElementById(`sup-${aura}`).value) || 1.0;
+                    const arrLv = elArr ? parseInt(elArr.value) : -1;
+                    const extraSupportMult = parseFloat(elSup.value) || 1.0;
 
                     const baseFlat = POEDB[aura][lv] || 0;
                     let enlMultiplier = (enlLv > 0 && POEDB.enlighten[enlLv] !== undefined) ? POEDB.enlighten[enlLv] : 1.0;
 
                     let arrMultiplier = 1.0;
                     let isLifeReservation = false;
-
                     if (arrLv === 0) {
                         arrMultiplier = 1.0;
                         isLifeReservation = true;
@@ -1847,6 +1955,16 @@
                         arrMultiplier = POEDB.arrogance[arrLv];
                         isLifeReservation = true;
                     }
+
+                    // 💡 【全新核心】：動態判斷網頁要亮紅色（生命）還是藍色（魔力）
+                    const webHighlight = isLifeReservation ? 'web-highlight-life' : 'web-highlight-mana';
+
+                    // 💡 如果目前的數值被修改過（不是預設值），就塞入變色 CSS，否則清除變色
+                    if (elSlot) elSlot.className = slotEff !== 0 ? webHighlight : '';
+                    if (elEnl) elEnl.className = enlLv !== 0 ? webHighlight : '';
+                    if (elMult) elMult.className = gemMult !== 100 ? webHighlight : '';
+                    if (elArr) elArr.className = arrLv !== -1 ? webHighlight : '';
+                    if (elSup) elSup.className = extraSupportMult !== 1 ? webHighlight : '';
 
                     if (isLifeReservation) {
                         let reserved = Math.floor((baseFlat * arrMultiplier * enlMultiplier * (gemMult / 100) * extraSupportMult * 100) / (100 + finalLifeEff + slotEff));
@@ -1862,6 +1980,12 @@
                 } else {
                     if (dispLife) dispLife.innerText = "-";
                     if (dispMana) dispMana.innerText = "-";
+                    // 如果沒勾選，把變色 Class 全部洗掉回歸預設白底
+                    if (elSlot) elSlot.className = '';
+                    if (elEnl) elEnl.className = '';
+                    if (elMult) elMult.className = '';
+                    if (elArr) elArr.className = '';
+                    if (elSup) elSup.className = '';
                 }
             });
 
@@ -1942,6 +2066,12 @@
             const domSummaryManaEff = document.getElementById('summary-mana-eff-calc');
             if (domSummaryLifeEff) domSummaryLifeEff.innerText = finalLifeEff + "%";
             if (domSummaryManaEff) domSummaryManaEff.innerText = finalManaEff + "%";
+
+            // 🚀 核心灌注：將剛剛大試算表精確算完的真數據，秒傳給全域快照
+            globalSumPctLife = sumPctLife;
+            globalSumPctMana = sumPctMana;
+            globalFlatLifeSum = flatLifeSum;
+            globalFlatManaSum = flatManaSum;
         }
 
         function saveState() {
@@ -1997,6 +2127,504 @@
             // 新程式碼片段
             renderCalculatorTable();
             initSubPages();
+
+            // ==========================================================================
+            // 🚀 終極完全體：PNG MetaChunk 官方存檔防禦罩系統 (免 1px 隱寫、百％穩健讀檔)
+            // ==========================================================================
+
+            // 🅰️ 功能 A：生成字卡並將數據注入 PNG 的 Meta 區塊 (官方原圖血魔球＋1:1 鋼鐵試算表版)
+            const btnDownloadConfig = document.getElementById('btn-download-config');
+            if (btnDownloadConfig) {
+                btnDownloadConfig.addEventListener('click', () => {
+                    const baseLife = document.getElementById('base-life')?.value || '0';
+                    const baseMana = document.getElementById('base-mana')?.value || '0';
+                    const auraEff = document.getElementById('summary-effect-calc')?.innerText || '0%';
+
+                    const isOverride = document.getElementById("override-global-enable")?.checked;
+                    let lifeEff = '0', manaEff = '0';
+                    if (isOverride) {
+                        lifeEff = document.getElementById("override-life-input")?.value || '0';
+                        manaEff = document.getElementById("override-mana-input")?.value || '0';
+                    } else {
+                        lifeEff = document.getElementById('calc-total-life-eff')?.innerText || '0';
+                        manaEff = document.getElementById('calc-total-mana-eff')?.innerText || '0';
+                    }
+
+                    // 1. 收集目前的網頁所有設定
+                    const buildState = {};
+                    document.querySelectorAll('input, select').forEach(el => {
+                        if (el.id) {
+                            buildState[el.id] = el.type === 'checkbox' ? el.checked : el.value;
+                        }
+                    });
+                    const cryptoKey = "POE-AURA-V1:" + btoa(encodeURIComponent(JSON.stringify(buildState)));
+
+                    // 2. 收集啟用的光環清單用於畫布顯示
+                    const activeAuras = [];
+                    document.querySelectorAll('.pct-row').forEach(row => {
+                        const id = row.id.replace('row-', '');
+                        if (document.getElementById(`chk-${id}`)?.checked) {
+                            activeAuras.push({
+                                name: row.querySelector('.aura-title-flex')?.innerText || id,
+                                isFlat: false,
+                                slot: document.getElementById(`eff-${id}`)?.value || '0',
+                                enl: document.getElementById(`enl-${id}`)?.value || '0',
+                                mult: document.getElementById(`mult-${id}`)?.value || '100',
+                                arr: document.getElementById(`arr-${id}`)?.value || '-1',
+                                sup: document.getElementById(`sup-${id}`)?.value || '1',
+                                resLife: document.getElementById(`cost-life-${id}`)?.innerText || '-',
+                                resMana: document.getElementById(`cost-mana-${id}`)?.innerText || '-'
+                            });
+                        }
+                    });
+
+                    document.querySelectorAll('.flat-row').forEach(row => {
+                        const aura = row.getAttribute('data-aura-type');
+                        if (document.getElementById(`chk-${aura}`)?.checked) {
+                            const labelText = aura === 'vitality' ? '活力' : (aura === 'precision' ? '精準' : '清晰');
+                            const currentLv = document.getElementById(`lv-${aura}`)?.value || '20';
+
+                            activeAuras.push({
+                                name: `${labelText}等級: ${currentLv}`,
+                                isFlat: true,
+                                slot: document.getElementById(`eff-${aura}`)?.value || '0',
+                                enl: document.getElementById(`enl-${aura}`)?.value || '0',
+                                mult: document.getElementById(`mult-${aura}`)?.value || '100',
+                                arr: document.getElementById(`arr-${aura}`)?.value || '-1',
+                                sup: document.getElementById(`sup-${aura}`)?.value || '1',
+                                resLife: document.getElementById(`cost-life-${aura}`)?.innerText || '-',
+                                resMana: document.getElementById(`cost-mana-${aura}`)?.innerText || '-'
+                            });
+                        }
+                    });
+
+                    // 🚀 核心非同步優化鎖：在記憶體中同步預載入這三張本地 PNG 圖檔
+                    const imgLifeFull = new Image();
+                    const imgManaFull = new Image();
+                    const imgReserve = new Image();
+
+                    let loadedCount = 0;
+                    const checkAndDraw = () => {
+                        loadedCount++;
+                        if (loadedCount === 3) {
+                            executeCanvasDrawing(); // 三張圖都好了，才啟動畫布渲染
+                        }
+                    };
+
+                    // 剛性對齊你網頁原本的路徑
+                    imgLifeFull.onload = checkAndDraw; imgLifeFull.src = './public/trees/life-full.png';
+                    imgManaFull.onload = checkAndDraw; imgManaFull.src = './public/trees/mana-full.png';
+                    imgReserve.onload = checkAndDraw; imgReserve.src = './public/trees/globe-reserve.png';
+
+                    // 將繪圖引擎封裝，確保圖片載入絕不破圖
+                    function executeCanvasDrawing() {
+                        const canvas = document.createElement('canvas');
+                        const ctx = canvas.getContext('2d');
+
+                        // 💡 調整 1：放棄自動偵測，直接剛性鎖死「3.5倍」或「4倍」超高解析度
+                        // 倍數越高，輸出的圖片像素越大、字體越銳利（建議 3 至 4 之間最完美，太高檔案會過大）
+                        const dpr = 4.5;
+
+                        const logicalWidth = 1020;
+                        const logicalHeight = 220 + (activeAuras.length * 32) + 25;
+
+                        // 實體像素直接放大 4.5 倍
+                        canvas.width = logicalWidth * dpr;
+                        canvas.height = logicalHeight * dpr;
+
+                        canvas.style.width = logicalWidth + 'px';
+                        canvas.style.height = logicalHeight + 'px';
+                        ctx.scale(dpr, dpr);
+
+                        // 💡 調整 2：全方位強迫瀏覽器開啟網格高階反鋸齒與絲滑文字工法
+                        ctx.imageSmoothingEnabled = true;
+                        ctx.imageSmoothingQuality = 'high';
+
+                        // 💡 調整 3：優化 Canvas 文字底層渲染，避免字體邊緣因四捨五入產生微小模糊
+                        ctx.textBaseline = 'middle';
+
+                        // 5. 底下維持您原本的繪圖邏輯（因為有了 ctx.scale，座標數據完全不用改！）
+                        ctx.fillStyle = '#ffffff';
+                        ctx.fillRect(0, 0, logicalWidth, logicalHeight);
+                        ctx.strokeStyle = '#777777';
+                        ctx.lineWidth = 1;
+                        ctx.strokeRect(10, 10, logicalWidth - 20, logicalHeight - 20);
+
+                        // 標題與網頁級數據看板
+                        ctx.fillStyle = '#1e3a8a';
+                        ctx.font = 'bold 22px "Segoe UI", "Microsoft JhengHei", sans-serif';
+                        ctx.fillText('Poe Aura-Calculator - 光環計算機', 25, 45);
+
+                        const titleWidth = ctx.measureText('Poe Aura-Calculator - 光環計算機').width;
+                        ctx.fillStyle = '#555555';
+                        ctx.font = '13px "Courier New", monospace';
+                        ctx.fillText('(https://poe-aura-calculator.pages.dev/)', 25 + titleWidth + 8, 45);
+
+                        // 🎯 修正：捨棄模糊的樣式搜尋，直接精準抓取網頁血魔球的真實保留結果元件
+                        let lifeReservedVal = 0;
+                        let manaReservedVal = 0;
+
+                        const lifeResEl = document.getElementById('ball-life-text-res');
+                        const manaResEl = document.getElementById('ball-mana-text-res');
+
+                        if (lifeResEl) {
+                            // 從 "Reserved: 45.20%" 中過濾出數字 45.20
+                            lifeReservedVal = parseFloat(lifeResEl.innerText.replace(/[^\d.]/g, "")) || 0;
+                        }
+                        if (manaResEl) {
+                            // 從 "Reserved: 85.00%" 中過濾出數字 85.00
+                            manaReservedVal = parseFloat(manaResEl.innerText.replace(/[^\d.]/g, "")) || 0;
+                        }
+
+                        const boardY = 65;
+                        const boardH = 42;
+                        const startBoardX = 25;
+                        const leftTotalWidth = 760;
+                        const cellW = leftTotalWidth / 3;
+
+                        // 1. 繪製靠左對齊的三格置頂看板
+                        const boardColors = ['#fce4d6', '#ddebf7', '#FAF5FF'];
+                        for (let i = 0; i < 3; i++) {
+                            ctx.fillStyle = boardColors[i];
+                            ctx.fillRect(startBoardX + cellW * i, boardY, cellW, boardH);
+                            ctx.strokeStyle = '#777777';
+                            ctx.strokeRect(startBoardX + cellW * i, boardY, cellW, boardH);
+                        }
+
+                        // 填入 3 格看板數據
+                        ctx.font = 'bold 12.5px "Segoe UI", "Microsoft JhengHei", sans-serif';
+                        ctx.textAlign = 'center';
+                        ctx.fillStyle = '#c2410c';
+                        ctx.fillText(`生命保留效用：${lifeEff}%`, startBoardX + cellW * 0 + cellW / 2, boardY + 21);
+                        ctx.fillStyle = '#2563eb';
+                        ctx.fillText(`魔力保留效用：${manaEff}%`, startBoardX + cellW * 1 + cellW / 2, boardY + 21);
+                        ctx.fillStyle = '#6b21a8';
+                        ctx.fillText(`光環效果加成：${auraEff}`, startBoardX + cellW * 2 + cellW / 2, boardY + 21);
+
+
+                        // ==========================================================================
+                        // 🔮 雙球完全體：修復黑罩覆蓋，並強制繪製保留與殘餘數值文字
+                        // ==========================================================================
+                        const ballSize = 64;
+
+                        // 🎯 【生命球】垂直精準對齊 (中心 837.5, Y軸 86)
+                        const targetLifeX = 837.5;
+                        const lifeBallY = 86;
+                        const lX = targetLifeX - 32;
+                        const lY = lifeBallY - 32;
+
+                        // 先畫底層全紅滿血球
+                        ctx.drawImage(imgLifeFull, lX, lY, ballSize, ballSize);
+
+                        // 保留多少 %，黑罩就從頭頂往下覆蓋多少高度
+                        const lifeReservePercent = Math.max(0, Math.min(100, lifeReservedVal)) / 100;
+                        if (lifeReservePercent > 0) {
+                            ctx.save();
+                            ctx.beginPath();
+                            ctx.arc(targetLifeX, lifeBallY, 32, 0, Math.PI * 2);
+                            ctx.clip();
+
+                            const cutH = ballSize * lifeReservePercent;
+                            const sHLife = imgReserve.height * lifeReservePercent; // 修正：依原圖比例動態計算裁剪高度
+                            ctx.drawImage(imgReserve, 0, 0, imgReserve.width, sHLife, lX, lY, ballSize, cutH);
+                            ctx.restore();
+                        }
+
+                        // 即時動態計算剩餘生命數值 (千分位化)
+                        const maxLifeNum = parseFloat(baseLife.replace(/,/g, '')) || 0;
+                        const currentLifeNum = Math.max(0, Math.round(maxLifeNum * (1 - lifeReservePercent)));
+
+                        ctx.textAlign = 'center';
+                        ctx.shadowBlur = 0; // 確保無陰影殘留
+
+                        // 1. Reserved 百分比文字
+                        ctx.fillStyle = '#333333';
+                        ctx.font = 'bold 11px "Segoe UI", "Microsoft JhengHei", sans-serif';
+                        ctx.fillText(`Reserved: ${lifeReservedVal.toFixed(2)}%`, targetLifeX, lifeBallY - 58);
+
+                        // 2. 殘餘數值移到 Reserved 下方、球的上面，並改為純黑色
+                        ctx.fillStyle = '#000000';
+                        ctx.font = 'bold 11px "Courier New", monospace';
+                        ctx.fillText(`${currentLifeNum} / ${maxLifeNum}`, targetLifeX, lifeBallY - 42);
+
+
+                        // 🎯 【魔力球】垂直精準對齊 (中心 942.5, Y軸 86)
+                        const targetManaX = 942.5;
+                        const manaBallY = 86;
+                        const mX = targetManaX - 32;
+                        const mY = manaBallY - 32;
+
+                        // 先畫底層全藍滿魔球
+                        ctx.drawImage(imgManaFull, mX, mY, ballSize, ballSize);
+
+                        const manaReservePercent = Math.max(0, Math.min(100, manaReservedVal)) / 100;
+                        if (manaReservePercent > 0) {
+                            ctx.save();
+                            ctx.beginPath();
+                            ctx.arc(targetManaX, manaBallY, 32, 0, Math.PI * 2);
+                            ctx.clip();
+
+                            const cutH = ballSize * manaReservePercent;
+                            const sHMana = imgReserve.height * manaReservePercent; // 修正：依原圖比例動態計算裁剪高度
+                            ctx.drawImage(imgReserve, 0, 0, imgReserve.width, sHMana, mX, mY, ballSize, cutH);
+                            ctx.restore();
+                        }
+
+                        // 即時動態計算剩餘魔力數值
+                        const maxManaNum = parseFloat(baseMana.replace(/,/g, '')) || 0;
+                        const currentManaNum = Math.max(0, Math.round(maxManaNum * (1 - manaReservePercent)));
+
+                        ctx.textAlign = 'center';
+                        ctx.shadowBlur = 0; // 確保無陰影殘留
+
+                        // 1. Reserved 百分比文字
+                        ctx.fillStyle = '#333333';
+                        ctx.font = 'bold 11px "Segoe UI", "Microsoft JhengHei", sans-serif';
+                        ctx.fillText(`Reserved: ${manaReservedVal.toFixed(2)}%`, targetManaX, manaBallY - 58);
+
+                        // 2. 殘餘數值移到 Reserved 下方、球的上面，並改為純黑色
+                        ctx.fillStyle = '#000000';
+                        ctx.font = 'bold 11px "Courier New", monospace';
+                        ctx.fillText(`${currentManaNum} / ${maxManaNum}`, targetManaX, manaBallY - 42);
+
+                        // 7. 大試算表雙層大標頭
+                        let tableY = 125;
+                        ctx.fillStyle = '#f0e000';
+                        ctx.fillRect(25, tableY, 760, 26);
+                        ctx.strokeRect(25, tableY, 760, 26);
+
+                        ctx.fillStyle = '#000000';
+                        ctx.font = 'bold 12px "Microsoft JhengHei", sans-serif';
+                        ctx.textAlign = 'center';
+                        ctx.fillText('使用者輸入區', 25 + 760 / 2, tableY + 13);
+
+                        ctx.fillStyle = '#af1400';
+                        ctx.fillRect(25 + 760, tableY, 210, 26);
+                        ctx.strokeRect(25 + 760, tableY, 210, 26);
+
+                        ctx.fillStyle = '#ffffff';
+                        ctx.font = 'bold 12px "Microsoft JhengHei", sans-serif';
+                        ctx.fillText('最終保留結果', 25 + 760 + 210 / 2, tableY + 13);
+
+                        // 項目明細第二層表頭：【新修正】高度從 26px 剛性拓寬至 36px，加大上下間距
+                        tableY += 26;
+                        const cols = [
+                            { name: '保留%', w: 60, bg: '#fdf9ee', color: '#000000' },
+                            { name: '名稱', w: 120, bg: '#fdf9ee', color: '#000000' },
+                            { name: '物品插槽保留效用/\n額外保留效用', w: 140, bg: '#fdf9ee', color: '#000000' },
+                            { name: '啟蒙等級(1-10)', w: 100, bg: '#fdf9ee', color: '#000000' },
+                            { name: '插槽中的技能寶石有\n80-100%消耗保留加成', w: 130, bg: '#fdf9ee', color: '#000000' },
+                            { name: '傲慢等級(1-31)/\n元素庇護盾牌(0)', w: 100, bg: '#fdf9ee', color: '#000000' },
+                            { name: '其他輔助\n技能倍率', w: 110, bg: '#fdf9ee', color: '#000000' },
+                            { name: '最終生命保留', w: 105, bg: '#faefe8', color: '#000000' },
+                            { name: '最終魔力保留', w: 105, bg: '#e7eef5', color: '#000000' }
+                        ];
+
+                        let currentX = 25;
+                        cols.forEach((col, cIdx) => {
+                            ctx.fillStyle = col.bg;
+                            // 【新修正】繪製格子時高度改為 36
+                            ctx.fillRect(currentX, tableY, col.w, 36);
+                            ctx.strokeStyle = '#777777';
+                            ctx.strokeRect(currentX, tableY, col.w, 36);
+
+                            ctx.fillStyle = col.color;
+                            ctx.font = 'bold 11px "Microsoft JhengHei", sans-serif';
+                            ctx.textAlign = 'center';
+
+                            // 【新修正】微調多行與單行的 Y 軸座標，確保在 36px 高度內絕對垂直居中
+                            const lines = col.name.split('\n');
+                            if (lines.length > 1) {
+                                lines.forEach((line, lineIdx) => {
+                                    ctx.fillText(line, currentX + col.w / 2, tableY + 12 + (lineIdx * 13));
+                                });
+                            } else {
+                                ctx.fillText(col.name, currentX + col.w / 2, tableY + 18);
+                            }
+                            currentX += col.w;
+                        });
+
+                        // 繪製光環資料格肉體：【新修正】因為表頭加高了 10px，資料格起點順延為 tableY + 36
+                        let currentY = tableY + 36;
+                        activeAuras.forEach(aura => {
+                            ctx.strokeStyle = '#777777';
+                            ctx.strokeRect(25, currentY, 970, 32);
+
+                            const slotText = aura.slot !== '0' ? `${aura.slot}%` : '0%';
+                            const nlText = aura.enl !== '0' ? `${aura.enl}等` : '無';
+                            const multText = `${aura.mult}%`;
+                            const arrText = aura.arr === '0' ? '0(庇護盾)' : (aura.arr > 0 ? `${aura.arr}等` : '無');
+
+                            // 【修正 1】：倍率回歸純字串，網頁輸入 1 圖片就顯示 1
+                            const supText = String(aura.sup);
+
+                            // 💡 大道至簡：直接百分之百剛性複製網頁上算好的文字（自帶 % 或 HP / MP），完全不囉唆！
+                            let displayLife = aura.resLife;
+                            let displayMana = aura.resMana;
+
+                            let groupBase = '固定值';
+                            if (!aura.isFlat) {
+                                const foundAura = AURA_CONFIG.find(a => a.name === aura.name);
+                                if (foundAura) groupBase = foundAura.group;
+                            }
+
+                            // 【新修正】：直接透過網頁的生命保留欄位是否有值（非 '-'），來判定該光環是生命保留還是魔力保留
+                            const activeColor = aura.resLife !== '-' ? '#dc2626' : '#2563eb';
+
+                            // 動態判定顏色鎖：若與預設值不同，立刻點亮主題色（紅或藍），否則維持預設的純黑（#000000）
+                            const colorSlot = aura.slot !== '0' ? activeColor : '#000000';
+                            const colorEnl = aura.enl !== '0' ? activeColor : '#000000';
+                            const colorMult = aura.mult !== '100' ? activeColor : '#000000';
+                            const colorArr = aura.arr !== '-1' ? activeColor : '#000000';
+                            const colorSup = aura.sup !== '1' ? activeColor : '#000000';
+
+                            let itemX = 25;
+                            // 保持剛性加粗，並套用全新的紅/藍動態變色變數
+                            const rowVals = [
+                                { val: groupBase, bg: '#f8fafc', color: '#475569', font: 'bold 11px "Microsoft JhengHei"' },
+                                { val: aura.name, bg: '#ffffff', color: '#000000', font: 'bold 12px "Microsoft JhengHei"' },
+                                { val: slotText, bg: '#ffffff', color: colorSlot, font: 'bold 12px "Courier New"' },
+                                { val: nlText, bg: '#ffffff', color: colorEnl, font: 'bold 12px "Microsoft JhengHei"' },
+                                { val: multText, bg: '#ffffff', color: colorMult, font: 'bold 12px "Courier New"' },
+                                { val: arrText, bg: '#ffffff', color: colorArr, font: 'bold 12px "Microsoft JhengHei"' },
+                                { val: supText, bg: '#ffffff', color: colorSup, font: 'bold 12px "Courier New"' },
+                                { val: displayLife, bg: '#faefe8', color: displayLife !== '-' ? '#dc2626' : '#999999', font: 'bold 14px "Courier New", "Microsoft JhengHei"' },
+                                { val: displayMana, bg: '#e7eef5', color: displayMana !== '-' ? '#2563eb' : '#999999', font: 'bold 14px "Courier New", "Microsoft JhengHei"' }
+                            ];
+
+                            rowVals.forEach((cell, vIdx) => {
+                                if (vIdx > 0) {
+                                    ctx.strokeStyle = '#777777';
+                                    ctx.beginPath(); ctx.moveTo(itemX, currentY); ctx.lineTo(itemX, currentY + 32); ctx.stroke();
+                                }
+
+                                ctx.fillStyle = cell.bg;
+                                ctx.fillRect(itemX + 1, currentY + 1, cols[vIdx].w - 2, 30);
+
+                                ctx.fillStyle = cell.color;
+                                ctx.font = cell.font;
+                                ctx.textAlign = 'center';
+                                ctx.fillText(cell.val, itemX + cols[vIdx].w / 2, currentY + 16);
+
+                                itemX += cols[vIdx].w;
+                            });
+
+                            currentY += 32;
+                        });
+
+                        ctx.textAlign = 'left';
+                        currentY += 12; // 表格結束後的微調距離
+                        ctx.strokeStyle = '#cccccc';
+                        ctx.beginPath(); ctx.moveTo(25, currentY); ctx.lineTo(995, currentY); ctx.stroke();
+
+                        ctx.fillStyle = '#dc2626';
+                        ctx.font = 'bold 16px "Microsoft JhengHei", sans-serif';
+                        // 【修改後】將文字繪製位置從 currentY + 65 往上挪到 currentY + 25，使其緊貼分割線
+                        ctx.fillText('本圖即是你的存檔點！下次直接上傳此圖，即可自動填入所有數據。', 25, currentY + 18);
+
+                        // 6. 導出時，因為實體畫布解析度很高，產出的 PNG 檔案畫質會提升數倍！
+                        canvas.toBlob((blob) => {
+                            const reader = new FileReader();
+                            reader.onloadend = function () {
+                                const arrayBuffer = reader.result;
+                                const uint8Array = new Uint8Array(arrayBuffer);
+
+                                const encoder = new TextEncoder();
+                                const secretBytes = encoder.encode(`\x00\x00\x00\x00MiltonAuraConfig:${cryptoKey}`);
+
+                                const finalBuffer = new Uint8Array(uint8Array.length + secretBytes.length);
+                                finalBuffer.set(uint8Array, 0);
+                                finalBuffer.set(secretBytes, uint8Array.length);
+
+                                const finalBlob = new Blob([finalBuffer], { type: 'image/png' });
+                                const url = URL.createObjectURL(finalBlob);
+                                const a = document.createElement('a');
+                                a.href = url;
+                                a.download = `poe_aura_card_${new Date().toISOString().slice(0, 10).replace(/-/g, '')}.png`;
+                                a.click();
+                                URL.revokeObjectURL(url);
+                            };
+                            reader.readAsArrayBuffer(blob);
+                        }, 'image/png'); // 亦可微調為 'image/png' 的最大規格
+                    }
+                });
+            }
+
+            // 🅑 功能 B：讀取上傳 PNG 檔案尾端的 Meta 標籤數據並一秒還原
+            const btnUploadConfig = document.getElementById('btn-upload-config');
+            if (btnUploadConfig) {
+                btnUploadConfig.addEventListener('click', () => {
+                    const fileInput = document.createElement('input');
+                    fileInput.type = 'file';
+                    fileInput.accept = 'image/png';
+
+                    fileInput.addEventListener('change', (e) => {
+                        const file = e.target.files[0];
+                        if (!file) return;
+
+                        const reader = new FileReader();
+                        reader.onload = function (event) {
+                            const arrayBuffer = event.target.result;
+                            const uint8Array = new Uint8Array(arrayBuffer);
+                            const decoder = new TextDecoder();
+                            const fullText = decoder.decode(uint8Array);
+
+                            const searchTag = "MiltonAuraConfig:AURA-V1:";
+                            // 修正尋找標籤，因為 btoa 編碼過後會有關鍵字
+                            const searchKey = "MiltonAuraConfig:POE-AURA-V1:";
+                            const index = fullText.indexOf(searchKey);
+
+                            if (index === -1) {
+                                alert("❌ 讀檔失敗：這張圖片無偵測到存檔資料，或圖片已被通訊軟體(如LINE)壓縮破壞了。");
+                                return;
+                            }
+
+                            try {
+                                let base64Str = fullText.substring(index + searchKey.length);
+                                const match = base64Str.match(/[A-Za-z0-9+/=]+/);
+                                if (!match) {
+                                    alert("❌ 存檔解析出錯：找不到正確的資料。");
+                                    return;
+                                }
+                                base64Str = match[0];
+
+                                const decodedJson = decodeURIComponent(atob(base64Str));
+                                const savedState = JSON.parse(decodedJson);
+
+                                // 填回大試算表
+                                Object.keys(savedState).forEach(id => {
+                                    const element = document.getElementById(id);
+                                    if (element) {
+                                        if (element.type === 'checkbox') {
+                                            element.checked = Boolean(savedState[id]);
+                                        } else {
+                                            element.value = String(savedState[id]).replace(/[<>]/g, "");
+                                        }
+                                    }
+                                });
+
+                                const zoomSliderEl = document.getElementById("guide-zoom-slider");
+                                if (zoomSliderEl) {
+                                    zoomSliderEl.dispatchEvent(new Event("input"));
+                                }
+                                if (typeof toggleGlobalOverride === "function") {
+                                    toggleGlobalOverride();
+                                }
+
+                                saveState();
+                                calculateAura();
+                                alert("📋 存檔讀取成功！已完美還原先前配置。");
+                            } catch (err) {
+                                console.error("解碼失敗:", err);
+                                alert("❌ 存檔解析出錯：圖片內保存之資料已損壞。");
+                            }
+                        };
+                        reader.readAsArrayBuffer(file);
+                    });
+
+                    fileInput.click();
+                });
+            }
 
             // 💡 新增：使用指南圖片縮放控制邏輯
             const zoomSlider = document.getElementById("guide-zoom-slider");
